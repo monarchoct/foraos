@@ -1488,4 +1488,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 500);
         }
     }
-}); 
+});
+
+// Chat History Management
+function addChatMessage(message, isUser = false) {
+    const chatHistory = document.getElementById('chat-history');
+    if (!chatHistory) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${isUser ? 'user' : 'ai'}`;
+    
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    messageDiv.appendChild(messageText);
+    
+    const timestamp = document.createElement('div');
+    timestamp.className = 'timestamp';
+    timestamp.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    messageDiv.appendChild(timestamp);
+    
+    chatHistory.appendChild(messageDiv);
+    
+    // Auto-scroll to bottom
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+    
+    // Limit to 50 messages to prevent memory issues
+    const messages = chatHistory.querySelectorAll('.chat-message');
+    if (messages.length > 50) {
+        messages[0].remove();
+    }
+}
+
+function clearChatHistory() {
+    const chatHistory = document.getElementById('chat-history');
+    if (chatHistory) {
+        chatHistory.innerHTML = '';
+    }
+}
+
+// Make functions globally available
+window.addChatMessage = addChatMessage;
+window.clearChatHistory = clearChatHistory; 
