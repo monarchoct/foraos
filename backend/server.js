@@ -79,11 +79,7 @@ class AIResponseGenerator {
                         }
                     ],
                     max_tokens: this.apiKeys.venice.maxTokens || 150,
-                    temperature: this.apiKeys.venice.temperature || 0.8,
-                    venice_parameters: {
-                        include_venice_system_prompt: false,
-                        ...(this.apiKeys.venice.characterSlug && { character_slug: this.apiKeys.venice.characterSlug })
-                    }
+                    temperature: this.apiKeys.venice.temperature || 0.8
                 })
             });
 
