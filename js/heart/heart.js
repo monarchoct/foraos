@@ -565,11 +565,6 @@ export class HeartSystem {
             // Generate AI response
             const response = await this.speechPlanner.generateResponse(input, inputEmotion);
             
-            // Add AI response to chat history
-            if (this.uiManager && response) {
-                this.uiManager.addMessage(response, false);
-            }
-            
             // Update mood based on interaction
             await this.emotionEngine.updateMood(input, response);
             

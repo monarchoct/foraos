@@ -15,6 +15,13 @@ body {
     color: white;
     overflow: hidden;
     height: 100vh;
+    /* Prevent mobile zoom and touch issues */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Prevent pull-to-refresh */
+    overscroll-behavior: none;
 }
 
 body::before {
@@ -92,6 +99,12 @@ body::before {
     background: transparent;
     z-index: 1;
     pointer-events: none;
+    /* Ensure fullscreen on mobile */
+    min-width: 100vw;
+    min-height: 100vh;
+    /* Handle mobile orientation changes */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* Wallet Module */
@@ -373,94 +386,6 @@ body::before {
 
 .wallet-disconnect-btn:hover {
     background: rgba(239, 68, 68, 0.3);
-}
-
-/* Chat History Container */
-.chat-history-container {
-    position: fixed;
-    top: 50%;
-    right: 30px;
-    transform: translateY(-50%);
-    width: 300px;
-    max-height: 60vh;
-    background: rgba(30, 30, 30, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 20px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    overflow-y: auto;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.chat-message {
-    background: rgba(40, 40, 40, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px 16px;
-    color: white;
-    font-size: 14px;
-    line-height: 1.4;
-    word-wrap: break-word;
-    animation: messageSlideIn 0.3s ease-out;
-}
-
-.chat-message.user {
-    background: rgba(0, 255, 100, 0.1);
-    border-color: rgba(0, 255, 100, 0.3);
-    margin-left: 20px;
-}
-
-.chat-message.ai {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    margin-right: 20px;
-}
-
-@keyframes messageSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Mobile responsive for chat history */
-@media (max-width: 768px) {
-    .chat-history-container {
-        right: 15px;
-        width: 250px;
-        max-height: 50vh;
-        padding: 15px;
-        gap: 10px;
-    }
-    
-    .chat-message {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 480px) {
-    .chat-history-container {
-        right: 10px;
-        width: 200px;
-        max-height: 40vh;
-        padding: 12px;
-        gap: 8px;
-    }
-    
-    .chat-message {
-        padding: 8px 10px;
-        font-size: 12px;
-    }
 }
 
 /* Floating chat input */
