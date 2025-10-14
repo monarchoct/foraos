@@ -585,6 +585,71 @@ app.get('/api/twitter/stats', (req, res) => {
   }
 });
 
+// AI Chat Endpoint (for frontend requests)
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { prompt, input, messages } = req.body;
+    
+    if (!prompt || !input) {
+      return res.status(400).json({ error: 'Prompt and input required' });
+    }
+    
+    if (!aiGenerator.apiKeys?.openai?.apiKey) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    }
+    
+    // Use provided messages array if available, otherwise create simple one
+    const messageArray = messages || [
+      {
+        role: 'system',
+        content: prompt
+      },
+      {
+        role: 'user',
+        content: input
+      }
+    ];
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${aiGenerator.apiKeys.openai.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: aiGenerator.apiKeys.openai.model || 'gpt-3.5-turbo',
+        messages: messageArray,
+        max_tokens: aiGenerator.apiKeys.openai.maxTokens || 150,
+        temperature: aiGenerator.apiKeys.openai.temperature || 0.8
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const aiResponse = data.choices[0]?.message?.content?.trim();
+    
+    if (aiResponse) {
+      console.log('🤖 Generated AI response:', aiResponse);
+      res.json({ 
+        success: true,
+        response: aiResponse 
+      });
+    } else {
+      throw new Error('No response from OpenAI');
+    }
+    
+  } catch (error) {
+    console.error('❌ AI chat error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
