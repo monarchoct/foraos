@@ -1511,9 +1511,9 @@ function addChatMessage(message, isUser = false) {
     // Auto-scroll to bottom
     chatHistory.scrollTop = chatHistory.scrollHeight;
     
-    // Limit to 50 messages to prevent memory issues
+    // Limit to 10 messages to prevent memory issues
     const messages = chatHistory.querySelectorAll('.chat-message');
-    if (messages.length > 50) {
+    if (messages.length > 10) {
         messages[0].remove();
     }
 }

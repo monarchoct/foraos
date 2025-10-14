@@ -378,8 +378,9 @@ body::before {
 /* Chat History Container */
 .chat-history-container {
     position: fixed;
-    top: 20px;
+    top: 50%;
     right: 20px;
+    transform: translateY(-50%);
     width: 300px;
     max-height: 60vh;
     overflow-y: auto;
@@ -439,8 +440,9 @@ body::before {
     .chat-history-container {
         width: 250px;
         max-height: 50vh;
-        top: 10px;
+        top: 50%;
         right: 10px;
+        transform: translateY(-50%);
     }
     
     .chat-message {
@@ -453,6 +455,9 @@ body::before {
     .chat-history-container {
         width: 200px;
         max-height: 45vh;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
     }
     
     .chat-message {
