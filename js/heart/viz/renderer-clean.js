@@ -135,6 +135,9 @@ export class Renderer {
             powerPreference: "low-power"  // Disable any GPU processing tricks
         });
         
+        // Set pixel ratio for high-DPI displays (mobile retina screens)
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
         // Use full window size
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -375,13 +378,26 @@ export class Renderer {
     }
 
     setupResizeHandler() {
-        window.addEventListener('resize', () => this.onWindowResize());
+        // Debounced resize handler for mobile zoom issues
+        let resizeTimeout;
+        const debouncedResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => this.onWindowResize(), 100);
+        };
+        
+        window.addEventListener('resize', debouncedResize);
+        window.addEventListener('orientationchange', debouncedResize);
     }
 
     // Handle window resize
     onWindowResize() {
         const width = window.innerWidth;
         const height = window.innerHeight;
+        
+        console.log(`📱 Resizing to: ${width}x${height}, pixelRatio: ${window.devicePixelRatio}`);
+        
+        // Update pixel ratio for mobile retina screens
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         
         // Update camera aspect ratio
         this.camera.aspect = width / height;
