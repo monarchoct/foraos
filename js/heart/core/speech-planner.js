@@ -149,11 +149,14 @@ Guidelines:
         // Try to use OpenAI if available
         try {
             const apiKeys = this.personality.configManager?.getApiKeys();
+            console.log('🔑 API Keys loaded:', apiKeys);
             
             if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
                 console.warn('OpenAI API key not configured, using fallback');
                 return this.generateFallbackResponse(input);
             }
+            
+            console.log('🤖 Generating AI response with OpenAI...');
             
             // Get conversation history for context
             const recentConversations = this.heartState.memoryManager?.getRecentConversations(10) || [];
