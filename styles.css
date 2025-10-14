@@ -1409,9 +1409,6 @@ body::before {
         border-radius: 20px;
         max-width: 90%;
         width: 320px;
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
     }
     
     .setting-item {
@@ -1437,9 +1434,6 @@ body::before {
         gap: 6px;
         max-width: 85%;
         width: 280px;
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
     }
     
     .voice-mode #voice-button {
@@ -2144,9 +2138,6 @@ body::before {
         max-height: 350px;
         max-width: 95%;
         width: 280px;
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
     }
     
     .setting-item {
@@ -2162,9 +2153,6 @@ body::before {
         gap: 4px;
         max-width: 90%;
         width: 240px;
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
     }
     
     .voice-mode #voice-button {
