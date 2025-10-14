@@ -31,7 +31,9 @@ export class InputManager {
             this.voiceRecognition = new SpeechRecognition();
             this.voiceRecognition.continuous = false;
             this.voiceRecognition.interimResults = false;
-            this.voiceRecognition.lang = 'en-US';
+            
+            // Detect current input mode and set language accordingly
+            this.updateLanguageForCurrentMode();
             
             this.voiceRecognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
@@ -44,8 +46,41 @@ export class InputManager {
             };
             
             this.inputSources.voice.enabled = true;
-            console.log('🎤 Voice recognition initialized');
+            console.log('🎤 Voice recognition initialized with language:', this.voiceRecognition.lang);
         }
+    }
+
+    updateLanguageForCurrentMode() {
+        if (!this.voiceRecognition) return;
+        
+        // Check current active input mode
+        const activeMode = this.getCurrentInputMode();
+        
+        if (activeMode === 'china') {
+            this.voiceRecognition.lang = 'zh-CN';
+            console.log('🇨🇳 Voice recognition set to Chinese (zh-CN)');
+        } else {
+            this.voiceRecognition.lang = 'en-US';
+            console.log('🇺🇸 Voice recognition set to English (en-US)');
+        }
+    }
+
+    getCurrentInputMode() {
+        // Check which input mode is currently active
+        const activeButton = document.querySelector('.input-mode-button.active');
+        if (activeButton) {
+            return activeButton.getAttribute('data-mode');
+        }
+        
+        // Fallback: check which input container is visible
+        const chatContainer = document.querySelector('.chat-input-container');
+        const chinaContainer = document.querySelector('.china-input-container');
+        
+        if (chinaContainer && !chinaContainer.style.display.includes('none')) {
+            return 'china';
+        }
+        
+        return 'chat'; // default
     }
 
     processVoiceInput(transcript) {
@@ -64,10 +99,13 @@ export class InputManager {
         }
         
         try {
+            // Update language based on current input mode before starting
+            this.updateLanguageForCurrentMode();
+            
             this.voiceRecognition.start();
             this.isListening = true;
             this.inputSources.voice.active = true;
-            console.log('🎤 Started voice listening');
+            console.log('🎤 Started voice listening in language:', this.voiceRecognition.lang);
         } catch (error) {
             console.error('❌ Error starting voice recognition:', error);
         }
