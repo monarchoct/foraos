@@ -1405,10 +1405,10 @@ body::before {
     .settings-container {
         max-height: 300px;
         padding: 12px;
-        margin: 20px auto;
+        margin: 20px;
         border-radius: 15px;
-        max-width: 70%;
-        width: 240px;
+        width: auto;
+        max-width: none;
     }
     
     .setting-item {
@@ -1430,11 +1430,11 @@ body::before {
     /* Voice module mobile sizing */
     .voice-mode .voice-input-container {
         padding: 8px 12px;
-        margin: 10px auto 20px auto;
+        margin: 10px 20px 20px 20px;
         border-radius: 15px;
         gap: 6px;
-        max-width: 75%;
-        width: 220px;
+        width: auto;
+        max-width: none;
     }
     
     .voice-mode #voice-button {
@@ -2134,11 +2134,11 @@ body::before {
     /* Extra small mobile styles for modules */
     .settings-container {
         padding: 8px;
-        margin: 15px auto;
+        margin: 15px;
         border-radius: 12px;
         max-height: 250px;
-        max-width: 75%;
-        width: 200px;
+        width: auto;
+        max-width: none;
     }
     
     .setting-item {
@@ -2150,11 +2150,11 @@ body::before {
     /* Voice module extra small mobile */
     .voice-mode .voice-input-container {
         padding: 6px 10px;
-        margin: 5px auto 15px auto;
+        margin: 5px 15px 15px 15px;
         border-radius: 12px;
         gap: 4px;
-        max-width: 80%;
-        width: 180px;
+        width: auto;
+        max-width: none;
     }
     
     .voice-mode #voice-button {
