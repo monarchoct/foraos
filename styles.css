@@ -1430,7 +1430,7 @@ body::before {
     /* Voice module mobile sizing */
     .voice-mode .voice-input-container {
         padding: 8px 12px;
-        margin: 10px auto;
+        margin: 10px auto 20px auto;
         border-radius: 15px;
         gap: 6px;
         max-width: 85%;
@@ -2150,7 +2150,7 @@ body::before {
     /* Voice module extra small mobile */
     .voice-mode .voice-input-container {
         padding: 6px 10px;
-        margin: 5px auto;
+        margin: 5px auto 15px auto;
         border-radius: 12px;
         gap: 4px;
         max-width: 90%;
