@@ -1,7 +1,5 @@
 // THREE.js is imported as ES module
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// Using global THREE object loaded in index.html
 import { AnimationManager } from './animation-manager.js';
 import { PhysicsManager } from './physics-manager.js';
 

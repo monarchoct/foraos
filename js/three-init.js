@@ -1,7 +1,4 @@
-// Import THREE.js as a module
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// Using global THREE object loaded in index.html
 
 // Make THREE globally available for legacy code
 window.THREE = THREE;
