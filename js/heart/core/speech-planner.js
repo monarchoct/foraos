@@ -187,7 +187,7 @@ Guidelines:
                 content: input
             });
             
-            // Make Venice AI API call
+            // Make OpenAI API call
             const response = await fetch(`${apiKeys.venice.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -195,19 +195,15 @@ Guidelines:
                     'Authorization': `Bearer ${apiKeys.venice.apiKey}`
                 },
                 body: JSON.stringify({
-                    model: apiKeys.venice.model || 'venice-uncensored',
+                    model: apiKeys.venice.model || 'gpt-3.5-turbo',
                     messages: messages,
                     max_tokens: apiKeys.venice.maxTokens || 150,
-                    temperature: apiKeys.venice.temperature || 0.8,
-                    venice_parameters: {
-                        include_venice_system_prompt: false,
-                        ...(apiKeys.venice.characterSlug && { character_slug: apiKeys.venice.characterSlug })
-                    }
+                    temperature: apiKeys.venice.temperature || 0.8
                 })
             });
             
             if (!response.ok) {
-                throw new Error(`Venice AI API error: ${response.status}`);
+                throw new Error(`OpenAI API error: ${response.status}`);
             }
             
             const data = await response.json();
