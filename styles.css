@@ -1433,8 +1433,8 @@ body::before {
         margin: 10px auto 20px auto;
         border-radius: 15px;
         gap: 6px;
-        max-width: 85%;
-        width: 280px;
+        max-width: 75%;
+        width: 220px;
     }
     
     .voice-mode #voice-button {
@@ -2153,8 +2153,8 @@ body::before {
         margin: 5px auto 15px auto;
         border-radius: 12px;
         gap: 4px;
-        max-width: 90%;
-        width: 240px;
+        max-width: 80%;
+        width: 180px;
     }
     
     .voice-mode #voice-button {
