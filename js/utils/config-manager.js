@@ -50,7 +50,7 @@ export class ConfigManager {
         if (path.includes('api-keys')) {
             return {
                 openai: { apiKey: '', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8 },
-                venice: { apiKey: '', baseUrl: 'https://api.venice.ai/api/v1', model: 'claude-3-5-sonnet', maxTokens: 150, temperature: 0.8, characterSlug: '' },
+                venice: { apiKey: '', baseUrl: 'https://api.openai.com/v1', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8, characterSlug: '' },
                 elevenlabs: { apiKey: '', baseUrl: 'https://api.elevenlabs.io/v1' },
                 twitter: { apiKey: '', apiSecret: '', accessToken: '', accessTokenSecret: '', bearerToken: '' },
                 twitch: { clientId: '', clientSecret: '', accessToken: '' }
