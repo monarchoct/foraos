@@ -1403,19 +1403,20 @@ body::before {
 /* Mobile responsive for settings */
 @media (max-width: 768px) {
     .settings-container {
-        max-height: 400px;
-        padding: 15px;
-        margin: 10px auto;
-        border-radius: 20px;
-        max-width: 90%;
-        width: 320px;
+        max-height: 300px;
+        padding: 12px;
+        margin: 20px auto;
+        border-radius: 15px;
+        max-width: 70%;
+        width: 240px;
     }
     
     .setting-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
-        padding: 10px 0;
+        gap: 6px;
+        padding: 6px 0;
+        font-size: 13px;
     }
     
     .setting-slider {
@@ -2132,17 +2133,18 @@ body::before {
     
     /* Extra small mobile styles for modules */
     .settings-container {
-        padding: 10px;
-        margin: 5px auto;
-        border-radius: 15px;
-        max-height: 350px;
-        max-width: 95%;
-        width: 280px;
+        padding: 8px;
+        margin: 15px auto;
+        border-radius: 12px;
+        max-height: 250px;
+        max-width: 75%;
+        width: 200px;
     }
     
     .setting-item {
-        padding: 8px 0;
-        gap: 6px;
+        padding: 5px 0;
+        gap: 4px;
+        font-size: 12px;
     }
     
     /* Voice module extra small mobile */
