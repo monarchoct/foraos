@@ -64,6 +64,14 @@
     "curiosityLevel": "High, especially about new tokens and trends"
   },
   
+  "config": {
+    "maxResponseLength": 150,
+    "useEmojis": true,
+    "useContractions": true,
+    "formalityLevel": "casual",
+    "responseStyle": "direct"
+  },
+  
   "emotions": {
     "excited": {
       "intensity": 0.9,
