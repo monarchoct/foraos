@@ -1,0 +1,62 @@
+{
+  "name": "mimicos-desktop",
+  "version": "2.0.0",
+  "description": "MimicOS 2.0 - Desktop AI Companion with Pump.fun Integration",
+  "main": "desktop-app/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "web-dev": "vite",
+    "web-build": "vite build",
+    "web-preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "elevenlabs": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.20.1",
+    "puppeteer": "^24.16.0",
+    "three": "^0.158.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "electron": "^38.1.0",
+    "electron-builder": "^24.6.4",
+    "vite": "^5.0.0"
+  },
+  "type": "module",
+  "build": {
+    "appId": "com.mimicos.desktop",
+    "productName": "MimicOS Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop-app/**/*",
+      "js/**/*",
+      "config/**/*",
+      "models/**/*",
+      "backgrounds/**/*",
+      "icons/**/*",
+      "styles.css",
+      "index.html",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icons/phantom.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icons/phantom.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icons/phantom.png"
+    }
+  }
+}

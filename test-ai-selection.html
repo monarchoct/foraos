@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Animation Selection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .message-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .config-display {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎭 AI Animation Selection Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Configuration</h2>
+        <p>This system uses <code>config/animation-config.json</code> for manual setup:</p>
+        <div class="config-display" id="config-display">
+            Loading configuration...
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test AI Selection</h2>
+        <p>Enter a message to test AI animation selection:</p>
+        <input type="text" class="message-input" id="test-message" 
+               placeholder="Enter a message like 'I am happy and want to dance!'" 
+               value="I am happy and want to dance!">
+        <br>
+        <button class="test-button" onclick="testAISelection()">Test AI Selection</button>
+        <button class="test-button" onclick="testBlinking()">Test Blinking</button>
+        <button class="test-button" onclick="testMouthMovement()">Test Mouth Movement</button>
+        <button class="test-button" onclick="testEmotions()">Test Emotions</button>
+        
+        <div class="result" id="test-result">
+            Results will appear here...
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Available Arrays</h2>
+        <div class="result" id="arrays-display">
+            Loading arrays...
+        </div>
+    </div>
+
+    <script type="module">
+        import { AnimationManager } from './js/heart/viz/animation-manager.js';
+
+        // Global variables
+        let animationManager = null;
+        let testResults = [];
+
+        // Load configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch('config/animation-config.json');
+                const config = await response.json();
+                document.getElementById('config-display').textContent = JSON.stringify(config, null, 2);
+            } catch (error) {
+                document.getElementById('config-display').textContent = 'Error loading config: ' + error.message;
+            }
+        }
+
+        // Initialize animation manager (mock)
+        async function initAnimationManager() {
+            // Create a mock animation manager for testing
+            animationManager = new AnimationManager();
+            
+            // Mock the character and mixer
+            animationManager.character = { traverse: () => {} };
+            animationManager.animationMixer = {};
+            
+            // Load config and setup
+            await animationManager.loadAnimationConfig();
+            animationManager.setupFromConfig();
+            
+            console.log('✅ Test Animation Manager initialized');
+        }
+
+        // Test AI selection
+        window.testAISelection = async function() {
+            const message = document.getElementById('test-message').value;
+            const resultDiv = document.getElementById('test-result');
+            
+            if (!animationManager) {
+                resultDiv.innerHTML = '<strong>Error:</strong> Animation manager not initialized';
+                return;
+            }
+            
+            try {
+                resultDiv.innerHTML = '<strong>Testing AI selection...</strong>';
+                
+                const selections = await animationManager.testAISelection(message);
+                
+                resultDiv.innerHTML = `
+                    <strong>✅ AI Selection Results:</strong><br>
+                    <strong>Message:</strong> "${message}"<br>
+                    <strong>Action:</strong> ${selections.action}<br>
+                    <strong>Mouth Movement:</strong> ${selections.mouthMovement}<br>
+                    <strong>Emotion:</strong> ${selections.emotion}<br>
+                    <br><em>Check console for detailed logs</em>
+                `;
+                
+                testResults.push({ message, selections, timestamp: new Date() });
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        };
+
+        // Test blinking
+        window.testBlinking = function() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<strong>👁️ Testing blinking system...</strong><br>Check console for blink logs';
+            
+            if (animationManager) {
+                animationManager.startBlink();
+            }
+        };
+
+        // Test mouth movement
+        window.testMouthMovement = function() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<strong>👄 Testing mouth movement...</strong><br>Check console for mouth logs';
+            
+            if (animationManager) {
+                animationManager.setShapekeyByCategory('mouthMovement', 'smile', 1.0);
+                setTimeout(() => {
+                    animationManager.setShapekeyByCategory('mouthMovement', 'smile', 0.0);
+                }, 2000);
+            }
+        };
+
+        // Test emotions
+        window.testEmotions = function() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<strong>😊 Testing emotions...</strong><br>Check console for emotion logs';
+            
+            if (animationManager) {
+                animationManager.setShapekeyByCategory('emotions', 'happy', 1.0);
+                setTimeout(() => {
+                    animationManager.setShapekeyByCategory('emotions', 'happy', 0.0);
+                }, 2000);
+            }
+        };
+
+        // Display available arrays
+        function displayArrays() {
+            if (animationManager && animationManager.aiSelectionArrays) {
+                const arraysDiv = document.getElementById('arrays-display');
+                arraysDiv.innerHTML = `
+                    <strong>Actions (${animationManager.aiSelectionArrays.actions.length}):</strong><br>
+                    ${animationManager.aiSelectionArrays.actions.join(', ')}<br><br>
+                    <strong>Mouth Movement (${animationManager.aiSelectionArrays.mouthMovement.length}):</strong><br>
+                    ${animationManager.aiSelectionArrays.mouthMovement.join(', ')}<br><br>
+                    <strong>Emotions (${animationManager.aiSelectionArrays.emotions.length}):</strong><br>
+                    ${animationManager.aiSelectionArrays.emotions.join(', ')}
+                `;
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            await loadConfig();
+            await initAnimationManager();
+            displayArrays();
+        });
+    </script>
+</body>
+</html> 

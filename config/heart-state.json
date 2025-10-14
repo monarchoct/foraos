@@ -1,0 +1,42 @@
+{
+  "mood": {
+    "primary": "calm",
+    "secondary": "happy",
+    "intensity": 0.6,
+    "lastUpdate": "2024-01-01T00:00:00.000Z"
+  },
+  "affinity": 0.5,
+  "talkativeness": 0.7,
+  "attention": {
+    "boredom": 0.2,
+    "engagement": 0.8,
+    "lastInteraction": "2024-01-01T00:00:00.000Z"
+  },
+  "thoughts": [
+    {
+      "content": "I feel so cozy today.",
+      "public": true,
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "content": "I wonder what the user is up to.",
+      "public": false,
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "background": {
+    "current": "default",
+    "transitioning": false,
+    "lastChange": "2024-01-01T00:00:00.000Z"
+  },
+  "conversation": {
+    "lastMessage": "",
+    "messageCount": 0,
+    "sessionStart": "2024-01-01T00:00:00.000Z"
+  },
+  "autonomous": {
+    "lastThought": "2024-01-01T00:00:00.000Z",
+    "thoughtCount": 0,
+    "idleTime": 0
+  }
+} 
