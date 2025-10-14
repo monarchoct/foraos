@@ -696,24 +696,24 @@ async function handleBackgroundUpload(file) {
             console.warn('⚠️ Background manager not available, falling back to direct application');
             
             // Fallback to direct texture application
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imageData = e.target.result;
-                const img = new Image();
-                img.onload = function() {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imageData = e.target.result;
+        const img = new Image();
+        img.onload = function() {
                     const loader = new window.THREE.TextureLoader();
                     const texture = loader.load(imageData + '?v=' + Date.now(), function(loadedTexture) {
-                        if (window.heartSystem?.renderer) {
+            if (window.heartSystem?.renderer) {
                             window.heartSystem.renderer.scene.background = loadedTexture;
                             console.log('✅ Background applied via fallback method');
-                        }
+            }
                     });
-                };
-                img.src = imageData;
-            };
-            reader.readAsDataURL(file);
-        }
-        
+        };
+        img.src = imageData;
+    };
+    reader.readAsDataURL(file);
+}
+
     } catch (error) {
         console.error('❌ Failed to process uploaded background:', error);
     }
@@ -1488,43 +1488,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 500);
         }
     }
-});
-
-// Chat History Management
-function addChatMessage(message, isUser = false) {
-    const chatHistory = document.getElementById('chat-history');
-    if (!chatHistory) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `chat-message ${isUser ? 'user' : 'ai'}`;
-    
-    const messageText = document.createElement('div');
-    // Filter out emojis and special characters, keep only text
-    const filteredMessage = message.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
-    messageText.textContent = filteredMessage;
-    messageDiv.appendChild(messageText);
-    
-    // Don't add timestamp since it's hidden anyway
-    
-    chatHistory.appendChild(messageDiv);
-    
-    // Auto-scroll to bottom
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-    
-    // Limit to 10 messages to prevent memory issues
-    const messages = chatHistory.querySelectorAll('.chat-message');
-    if (messages.length > 10) {
-        messages[0].remove();
-    }
-}
-
-function clearChatHistory() {
-    const chatHistory = document.getElementById('chat-history');
-    if (chatHistory) {
-        chatHistory.innerHTML = '';
-    }
-}
-
-// Make functions globally available
-window.addChatMessage = addChatMessage;
-window.clearChatHistory = clearChatHistory; 
+}); 

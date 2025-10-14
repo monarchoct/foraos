@@ -549,11 +549,6 @@ export class HeartSystem {
         this.isProcessing = true;
         console.log('📝 Processing user input:', input);
         
-        // Display user message in chat history
-        if (window.addChatMessage) {
-            window.addChatMessage(input, true);
-        }
-        
         try {
             // Store in memory
             this.memoryManager.addUserMessage(input);
@@ -578,11 +573,6 @@ export class HeartSystem {
             
             // Store conversation
             this.memoryManager.addConversation(input, response);
-            
-            // Display AI response in chat history
-            if (window.addChatMessage && response) {
-                window.addChatMessage(response, false);
-            }
             
             console.log('✅ User input processed successfully');
             
