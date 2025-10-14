@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # HEART AI Companion System
 
 A sophisticated AI companion system with emotional intelligence, personality-driven responses, and lifelike 3D visualization using Three.js.
@@ -292,3 +293,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Made with ❤️ for creating meaningful AI companions** 
+=======
+# ForaOS
+Four.Meme Mascot Ai Companion
+>>>>>>> 84900d54d7b6dfd86ecac6b455421b5ad8823333
