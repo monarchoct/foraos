@@ -38,7 +38,21 @@ export class ConfigManager {
                 }
                 throw new Error(`Failed to load config: ${response.statusText}`);
             }
-            return await response.json();
+            const config = await response.json();
+            
+            // If API keys file exists but has empty keys, log a warning
+            if (path.includes('api-keys')) {
+                const hasKeys = Object.values(config).some(service => 
+                    service.apiKey && service.apiKey.trim() !== ''
+                );
+                if (!hasKeys) {
+                    console.warn('⚠️ API keys file found but all keys are empty. Add your API keys to GitHub Secrets for full functionality.');
+                } else {
+                    console.log('✅ API keys loaded successfully');
+                }
+            }
+            
+            return config;
         } catch (error) {
             console.error(`❌ Error loading config from ${path}:`, error);
             console.warn(`⚠️ Using default config for ${path}`);
