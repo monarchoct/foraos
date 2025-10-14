@@ -3,7 +3,7 @@ export class ConfigManager {
         this.configs = {};
         this.configPaths = {
             'personality': 'config/personality.json',
-            'api-keys': 'config/api-keys-local.json', // Use local file for development
+            'api-keys': 'config/api-keys.json', // Back to regular file
             'heart-state': 'config/heart-state.json',
             'memory': 'config/memory.json'
         };

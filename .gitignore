@@ -71,4 +71,4 @@ Thumbs.db
 .vercel
 
 # Local API keys (never upload these!)
-config/api-keys-local.json
+# config/api-keys-local.json
