@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+// Using global THREE object loaded in index.html
 
 export class PhysicsManager {
     constructor() {

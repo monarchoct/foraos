@@ -1,11 +1,5 @@
 // Clean THREE.js GLB loader implementation
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { OutlineEffect } from 'three/addons/effects/OutlineEffect.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+// Using global THREE object loaded in index.html
 
 export class Renderer {
     constructor() {
