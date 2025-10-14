@@ -144,12 +144,12 @@ Guidelines:
     }
 
     async generateWithAI(prompt, input) {
-        // Try to use Venice AI if available
+        // Try to use OpenAI if available
         try {
             const apiKeys = this.personality.configManager?.getApiKeys();
             
-            if (!apiKeys?.venice?.apiKey || apiKeys.venice.apiKey === '<your-venice-token-here>') {
-                console.warn('Venice AI API key not configured, using fallback');
+            if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
+                console.warn('OpenAI API key not configured, using fallback');
                 return this.generateFallbackResponse(input);
             }
             
@@ -188,17 +188,17 @@ Guidelines:
             });
             
             // Make OpenAI API call
-            const response = await fetch(`${apiKeys.venice.baseUrl}/chat/completions`, {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKeys.venice.apiKey}`
+                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`
                 },
                 body: JSON.stringify({
-                    model: apiKeys.venice.model || 'gpt-3.5-turbo',
+                    model: apiKeys.openai.model || 'gpt-3.5-turbo',
                     messages: messages,
-                    max_tokens: apiKeys.venice.maxTokens || 150,
-                    temperature: apiKeys.venice.temperature || 0.8
+                    max_tokens: apiKeys.openai.maxTokens || 150,
+                    temperature: apiKeys.openai.temperature || 0.8
                 })
             });
             
@@ -210,14 +210,14 @@ Guidelines:
             const aiResponse = data.choices[0]?.message?.content?.trim();
             
             if (aiResponse) {
-                console.log('🤖 Venice AI generated response:', aiResponse);
+                console.log('🤖 OpenAI generated response:', aiResponse);
                 return aiResponse;
             } else {
-                throw new Error('No response from Venice AI');
+                throw new Error('No response from OpenAI');
             }
             
         } catch (error) {
-            console.warn('Venice AI not available, using fallback:', error.message);
+            console.warn('OpenAI not available, using fallback:', error.message);
             return this.generateFallbackResponse();
         }
     }

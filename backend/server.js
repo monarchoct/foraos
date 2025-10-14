@@ -52,22 +52,22 @@ class AIResponseGenerator {
     }
 
     async generateReply(mentionText, authorUsername) {
-        if (!this.apiKeys?.venice?.apiKey || !this.personality) {
-            console.error('❌ Venice AI configuration not loaded');
+        if (!this.apiKeys?.openai?.apiKey || !this.personality) {
+            console.error('❌ OpenAI configuration not loaded');
             return null;
         }
 
         try {
             const prompt = this.buildPrompt(mentionText, authorUsername);
             
-            const response = await fetch(`${this.apiKeys.venice.baseUrl}/chat/completions`, {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.apiKeys.venice.apiKey}`,
+                    'Authorization': `Bearer ${this.apiKeys.openai.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: this.apiKeys.venice.model || 'venice-uncensored',
+                    model: this.apiKeys.openai.model || 'gpt-3.5-turbo',
                     messages: [
                         {
                             role: 'system',
@@ -78,8 +78,8 @@ class AIResponseGenerator {
                             content: `@mimicOSX ${mentionText}`
                         }
                     ],
-                    max_tokens: this.apiKeys.venice.maxTokens || 150,
-                    temperature: this.apiKeys.venice.temperature || 0.8
+                    max_tokens: this.apiKeys.openai.maxTokens || 150,
+                    temperature: this.apiKeys.openai.temperature || 0.8
                 })
             });
 
@@ -87,15 +87,15 @@ class AIResponseGenerator {
             
             if (data.choices && data.choices[0]?.message?.content) {
                 const reply = data.choices[0].message.content.trim();
-                console.log(`🤖 Generated Venice AI reply: "${reply}"`);
+                console.log(`🤖 Generated OpenAI reply: "${reply}"`);
                 return reply;
             } else {
-                console.error('❌ No response from Venice AI:', data);
+                console.error('❌ No response from OpenAI:', data);
                 return null;
             }
             
         } catch (error) {
-            console.error('❌ Failed to generate Venice AI reply:', error);
+            console.error('❌ Failed to generate OpenAI reply:', error);
             return null;
         }
     }
