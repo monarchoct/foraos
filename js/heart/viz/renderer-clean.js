@@ -126,29 +126,33 @@ export class Renderer {
     }
 
     setupRenderer() {
-        console.log('🖥️ Setting up MINIMAL renderer - no processing at all...');
+        console.log('🖥️ Setting up renderer for mobile optimization...');
         
-        // Most basic renderer possible - no effects, no processing
+        // Mobile-optimized renderer
         this.renderer = new THREE.WebGLRenderer({ 
-            antialias: false,
+            antialias: true,
             alpha: true,
-            powerPreference: "low-power"  // Disable any GPU processing tricks
+            powerPreference: "high-performance",
+            precision: "highp"
         });
         
-        // Set pixel ratio for high-DPI displays (mobile retina screens)
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        
-        // Use full window size
+        // Use full window size with proper pixel ratio for mobile
         const width = window.innerWidth;
         const height = window.innerHeight;
-        this.renderer.setSize(width, height);
+        const pixelRatio = Math.min(window.devicePixelRatio, 2); // Cap at 2 for performance
         
-        // Disable ALL possible processing
-        this.renderer.shadowMap.enabled = false;
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(pixelRatio);
+        
+        console.log(`📱 Mobile renderer: ${width}x${height}, pixelRatio: ${pixelRatio}`);
+        
+        // Enable shadows for better quality
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.setClearColor(0x000000, 0);
         
-        // Force basic rendering
-        this.renderer.info.autoReset = false;
+        // Better rendering quality
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         
         this.container.appendChild(this.renderer.domElement);
         console.log(`✅ MINIMAL renderer created - absolutely no processing`);
@@ -378,35 +382,31 @@ export class Renderer {
     }
 
     setupResizeHandler() {
-        // Debounced resize handler for mobile zoom issues
-        let resizeTimeout;
-        const debouncedResize = () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => this.onWindowResize(), 100);
-        };
-        
-        window.addEventListener('resize', debouncedResize);
-        window.addEventListener('orientationchange', debouncedResize);
+        // Handle both resize and orientation change
+        window.addEventListener('resize', () => this.onWindowResize());
+        window.addEventListener('orientationchange', () => {
+            // Delay to ensure new dimensions are available
+            setTimeout(() => this.onWindowResize(), 100);
+        });
     }
 
-    // Handle window resize
+    // Handle window resize with mobile optimization
     onWindowResize() {
         const width = window.innerWidth;
         const height = window.innerHeight;
+        const pixelRatio = Math.min(window.devicePixelRatio, 2);
         
-        console.log(`📱 Resizing to: ${width}x${height}, pixelRatio: ${window.devicePixelRatio}`);
-        
-        // Update pixel ratio for mobile retina screens
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        console.log(`📱 Resize: ${width}x${height}, pixelRatio: ${pixelRatio}`);
         
         // Update camera aspect ratio
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
         
-        // Update renderer size
+        // Update renderer size with proper pixel ratio
         this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(pixelRatio);
         
-        // Update post-processing composer
+        // Update post-processing composer if it exists
         if (this.composer) {
             this.composer.setSize(width, height);
         }

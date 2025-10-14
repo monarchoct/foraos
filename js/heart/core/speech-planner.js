@@ -2,7 +2,7 @@ export class SpeechPlanner {
     constructor(personality, heartState) {
         this.personality = personality;
         this.heartState = heartState;
-        this.config = personality.config || {};
+        this.config = personality.config.speechBehavior;
         this.onSpeechReady = null;
         this.isGenerating = false;
         this.animationManager = null; // Will be set by HeartSystem
