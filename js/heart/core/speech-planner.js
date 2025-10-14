@@ -192,8 +192,11 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            // Make OpenAI API call through CORS proxy
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const apiUrl = encodeURIComponent('https://api.openai.com/v1/chat/completions');
+            
+            const response = await fetch(proxyUrl + apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
