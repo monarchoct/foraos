@@ -104,7 +104,14 @@
     </div>
 
     <!-- Three.js for 3D graphics -->
-    <script src="https://threejs.org/build/three.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
     <script>
         // Wait for THREE to load, then add our extensions
         if (typeof THREE !== 'undefined') {
@@ -574,6 +581,6 @@
         }
     </script>
     
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html> 
