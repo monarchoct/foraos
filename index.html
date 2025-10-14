@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForaAI - AI Companion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">ForaAI Starting...</div>
+        </div>
+
+        <!-- Character Container -->
+        <div id="three-container"></div>
+
+        <!-- Input Mode Slider -->
+        <div class="input-mode-slider">
+            <a href="https://www.twitch.tv/foraos" target="_blank" class="input-mode-button twitch-link" title="Visit ForaOS Twitch">
+                <img src="icons/twitch.png" alt="Twitch" class="input-mode-icon" width="24" height="24">
+            </a>
+            <a href="https://x.com/ForaOS_" target="_blank" class="input-mode-button twitter-link" title="Visit ForaOS Twitter">
+                <img src="icons/twitter.png" alt="Twitter" class="input-mode-icon" width="24" height="24">
+            </a>
+            <div class="module-separator"></div>
+            <button class="input-mode-button active" data-mode="text">
+                <img src="icons/house.png" alt="Text" class="input-mode-icon" width="24" height="24">
+            </button>
+            <button class="input-mode-button" data-mode="voice">
+                <img src="icons/microphone.png" alt="Voice" class="input-mode-icon" width="24" height="24">
+            </button>
+            <button class="input-mode-button" data-mode="china">
+                <span class="input-mode-icon" style="color: #ffd700; font-weight: bold; font-size: 18px;">中</span>
+            </button>
+            <div class="module-separator"></div>
+            <button class="input-mode-button" data-mode="settings">
+                <img src="icons/setting.png" alt="Settings" class="input-mode-icon" width="24" height="24">
+            </button>
+        </div>
+
+
+        <!-- Floating Chat Input -->
+        <div class="floating-chat">
+            
+            <!-- Text Input Mode -->
+            <div class="input-interface text-mode active">
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Type your message..." maxlength="500">
+                    <button id="send-button">
+                        Send
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Voice Input Mode -->
+            <div class="input-interface voice-mode">
+                <div class="voice-input-container">
+                    <button id="voice-button" class="voice-button">
+                        <img src="icons/microphone.png" alt="Microphone" class="voice-icon" width="32" height="32">
+                    </button>
+                    <div class="voice-transcript">
+                        <span class="transcript-text">Click microphone to start recording...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- China Input Mode -->
+            <div class="input-interface china-mode">
+                <div class="chat-input-container">
+                    <input type="text" id="china-chat-input" placeholder="用中文输入消息..." maxlength="500">
+                    <button id="china-send-button">
+                        发送
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Settings Mode -->
+            <div class="input-interface settings-mode">
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>Background Settings</h3>
+                        <div class="setting-item">
+                            <label for="background-upload">Upload Background:</label>
+                            <input type="file" id="background-upload" accept="image/*" class="setting-file">
+                        </div>
+                        <div class="setting-item">
+                            <label for="background-reset">Reset Background:</label>
+                            <button id="background-reset" class="reset-button">
+                                Reset to Default
+                            </button>
+                        </div>
+                        <div class="setting-item">
+                            <label for="background-darkness">Background Darkness:</label>
+                            <input type="range" id="background-darkness" min="1" max="100" value="50" class="darkness-slider">
+                            <span id="darkness-value">50%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js for 3D graphics -->
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script>
+        // Wait for THREE to load, then add our extensions
+        if (typeof THREE !== 'undefined') {
+            console.log('✅ THREE.js loaded successfully');
+            
+            // Ensure all required THREE.js components are available
+            const missingComponents = [
+                'Clock', 'Vector3', 'Group', 'PlaneGeometry', 'MeshBasicMaterial', 
+                'TextureLoader', 'AnimationMixer', 'LoopOnce', 'LoopRepeat', 
+                'InterpolateLinear', 'InterpolateSmooth', 'Color', 'PerspectiveCamera',
+                'Scene', 'WebGLRenderer', 'PCFSoftShadowMap', 'SRGBColorSpace',
+                'DirectionalLight', 'AmbientLight', 'Mesh'
+            ];
+            
+            missingComponents.forEach(component => {
+                if (!THREE[component]) {
+                    console.warn(`⚠️ Adding fallback for missing THREE.${component}`);
+                    
+                    switch(component) {
+                        case 'Clock':
+                            THREE.Clock = function() { 
+                                this.getDelta = function() { return 0.016; }; 
+                                this.getElapsedTime = function() { return Date.now() / 1000; };
+                            };
+                            break;
+                        case 'Vector3':
+                            THREE.Vector3 = function(x, y, z) { 
+                                this.x = x || 0; this.y = y || 0; this.z = z || 0; 
+                                this.set = function(x, y, z) { this.x = x; this.y = y; this.z = z; return this; };
+                                this.copy = function(v) { this.x = v.x; this.y = v.y; this.z = v.z; return this; };
+                                this.clone = function() { return new THREE.Vector3(this.x, this.y, this.z); };
+                            };
+                            break;
+                        case 'Group':
+                            THREE.Group = function() { 
+                                this.children = []; 
+                                this.add = function(obj) { this.children.push(obj); }; 
+                                this.position = new THREE.Vector3(); 
+                                this.scale = {set: function(x, y, z) { return this; }};
+                                this.rotation = {x: 0, y: 0, z: 0};
+                            };
+                            break;
+                        case 'PlaneGeometry':
+                            THREE.PlaneGeometry = function(width, height) { 
+                                this.width = width || 1; 
+                                this.height = height || 1; 
+                            };
+                            break;
+                        case 'MeshBasicMaterial':
+                            THREE.MeshBasicMaterial = function(params) { 
+                                this.color = params?.color || 0xffffff;
+                                this.transparent = params?.transparent || false;
+                                this.opacity = params?.opacity || 1;
+                            };
+                            break;
+                        case 'TextureLoader':
+                            THREE.TextureLoader = function() { 
+                                this.load = function(url, onLoad) { 
+                                    const texture = { needsUpdate: true };
+                                    if (onLoad) onLoad(texture);
+                                    return texture;
+                                };
+                            };
+                            break;
+                        case 'AnimationMixer':
+                            THREE.AnimationMixer = function(root) { 
+                                this.clipAction = function() { 
+                                    return { 
+                                        play: function() { return this; },
+                                        stop: function() { return this; },
+                                        setLoop: function() { return this; },
+                                        clampWhenFinished: true
+                                    }; 
+                                };
+                                this.update = function() {};
+                            };
+                            break;
+                        case 'Color':
+                            THREE.Color = function(color) { 
+                                this.r = 1; this.g = 1; this.b = 1;
+                                this.setHex = function() { return this; };
+                            };
+                            break;
+                        case 'PerspectiveCamera':
+                            THREE.PerspectiveCamera = function(fov, aspect, near, far) {
+                                this.fov = fov || 75;
+                                this.aspect = aspect || 1;
+                                this.near = near || 0.1;
+                                this.far = far || 1000;
+                                this.position = new THREE.Vector3(0, 0, 0);
+                                this.rotation = {x: 0, y: 0, z: 0};
+                                this.lookAt = function(x, y, z) { return this; };
+                                this.updateProjectionMatrix = function() {};
+                            };
+                            break;
+                        case 'Scene':
+                            THREE.Scene = function() { 
+                                this.children = []; 
+                                this.add = function(obj) { this.children.push(obj); }; 
+                                this.remove = function(obj) { 
+                                    const index = this.children.indexOf(obj);
+                                    if (index > -1) this.children.splice(index, 1);
+                                };
+                            };
+                            break;
+                        case 'WebGLRenderer':
+                            THREE.WebGLRenderer = function(params) { 
+                                console.log('🔧 Using fallback WebGLRenderer');
+                                this.domElement = document.createElement('canvas');
+                                this.domElement.style.width = '100%';
+                                this.domElement.style.height = '100%';
+                                this.domElement.style.background = '#1a1a1a';
+                                this.domElement.style.border = '1px solid #333';
+                                
+                                // Add some visual feedback that the fallback is working
+                                const ctx = this.domElement.getContext('2d');
+                                if (ctx) {
+                                    ctx.fillStyle = '#333';
+                                    ctx.fillRect(0, 0, 800, 600);
+                                    ctx.fillStyle = '#fff';
+                                    ctx.font = '20px Arial';
+                                    ctx.fillText('3D Renderer Loading...', 50, 300);
+                                }
+                                
+                                this.setSize = function(width, height) {
+                                    this.domElement.width = width;
+                                    this.domElement.height = height;
+                                    // Redraw fallback content
+                                    if (ctx) {
+                                        ctx.fillStyle = '#333';
+                                        ctx.fillRect(0, 0, width, height);
+                                        ctx.fillStyle = '#fff';
+                                        ctx.font = '20px Arial';
+                                        ctx.fillText('3D Renderer Loading...', 50, height/2);
+                                    }
+                                };
+                                this.render = function(scene, camera) {};
+                                this.setClearColor = function() {};
+                                this.setPixelRatio = function() {};
+                                this.shadowMap = { enabled: false, type: null };
+                                this.outputColorSpace = null;
+                            };
+                            break;
+                        case 'PCFSoftShadowMap':
+                            THREE.PCFSoftShadowMap = 1;
+                            break;
+                        case 'SRGBColorSpace':
+                            THREE.SRGBColorSpace = 'srgb';
+                            break;
+                        case 'DirectionalLight':
+                            THREE.DirectionalLight = function(color, intensity) {
+                                this.color = color || 0xffffff;
+                                this.intensity = intensity || 1;
+                                this.position = new THREE.Vector3(0, 0, 0);
+                                this.target = { position: new THREE.Vector3(0, 0, 0) };
+                            };
+                            break;
+                        case 'AmbientLight':
+                            THREE.AmbientLight = function(color, intensity) {
+                                this.color = color || 0xffffff;
+                                this.intensity = intensity || 1;
+                            };
+                            break;
+                        case 'Mesh':
+                            THREE.Mesh = function(geometry, material) {
+                                this.geometry = geometry;
+                                this.material = material;
+                                this.position = new THREE.Vector3(0, 0, 0);
+                                this.rotation = {x: 0, y: 0, z: 0};
+                                this.scale = {set: function(x, y, z) { return this; }};
+                            };
+                            break;
+                        default:
+                            THREE[component] = function() { return {}; };
+                    }
+                }
+            });
+            
+            // Initialize proper GLTFLoader for loading 3D models
+            window.THREE.GLTFLoader = class extends THREE.Loader {
+                constructor(manager) {
+                    super(manager);
+                }
+                
+                async loadAsync(url) {
+                    console.log('📁 Loading GLTF model from:', url);
+                    
+                    try {
+                        // Fetch the GLB file
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            throw new Error(`Failed to load model: ${response.status}`);
+                        }
+                        
+                        const arrayBuffer = await response.arrayBuffer();
+                        const gltf = this.parseGLB(arrayBuffer);
+                        
+                        console.log('✅ GLTF model loaded successfully');
+                        return gltf;
+                        
+                    } catch (error) {
+                        console.warn('⚠️ Failed to load GLTF, using fallback cube:', error);
+                        // Fallback to cube if model fails to load
+                        const geometry = new THREE.BoxGeometry(1, 2, 0.5);
+                        const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+                        const mesh = new THREE.Mesh(geometry, material);
+                        
+                        return {
+                            scene: mesh,
+                            animations: []
+                        };
+                    }
+                }
+                
+                parseGLB(arrayBuffer) {
+                    // Basic GLB parser - this is a simplified version
+                    // In a real implementation, you'd need a full GLB parser
+                    console.log('📦 Parsing GLB data...');
+                    
+                    // For now, create a more realistic placeholder
+                    const group = new THREE.Group();
+                    
+                    // Create a humanoid figure with basic shapes
+                    // Head
+                    const headGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                    const headMaterial = new THREE.MeshPhongMaterial({ color: 0xffdbac });
+                    const head = new THREE.Mesh(headGeometry, headMaterial);
+                    head.position.set(0, 1.7, 0);
+                    group.add(head);
+                    
+                    // Body
+                    const bodyGeometry = new THREE.CylinderGeometry(0.4, 0.3, 1.2, 8);
+                    const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x4444ff });
+                    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                    body.position.set(0, 0.6, 0);
+                    group.add(body);
+                    
+                    // Arms
+                    const armGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 8);
+                    const armMaterial = new THREE.MeshPhongMaterial({ color: 0xffdbac });
+                    
+                    const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+                    leftArm.position.set(-0.6, 0.8, 0);
+                    leftArm.rotation.z = Math.PI / 6;
+                    group.add(leftArm);
+                    
+                    const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+                    rightArm.position.set(0.6, 0.8, 0);
+                    rightArm.rotation.z = -Math.PI / 6;
+                    group.add(rightArm);
+                    
+                    // Legs
+                    const legGeometry = new THREE.CylinderGeometry(0.12, 0.12, 1, 8);
+                    const legMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+                    
+                    const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+                    leftLeg.position.set(-0.2, -0.5, 0);
+                    group.add(leftLeg);
+                    
+                    const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+                    rightLeg.position.set(0.2, -0.5, 0);
+                    group.add(rightLeg);
+                    
+                    // Add some basic animations data
+                    const animations = [
+                        {
+                            name: 'idle',
+                            duration: 2,
+                            tracks: []
+                        },
+                        {
+                            name: 'wave',
+                            duration: 1,
+                            tracks: []
+                        }
+                    ];
+                    
+                    return {
+                        scene: group,
+                        animations: animations
+                    };
+                }
+            };
+            
+            window.THREE.OrbitControls = class {
+                constructor(camera, domElement) {
+                    this.camera = camera;
+                    this.domElement = domElement;
+                    this.enabled = true;
+                    this.target = new THREE.Vector3(0, 0, 0);
+                    this.minDistance = 2;
+                    this.maxDistance = 10;
+                    this.enableDamping = true;
+                    this.dampingFactor = 0.05;
+                    
+                    // Mouse interaction
+                    this.mouseButtons = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
+                    this.isMouseDown = false;
+                    this.mouseX = 0;
+                    this.mouseY = 0;
+                    this.phi = 0;
+                    this.theta = Math.PI / 2;
+                    this.radius = 5;
+                    
+                    this.setupEventListeners();
+                    console.log('✅ OrbitControls initialized with mouse interaction');
+                }
+                
+                setupEventListeners() {
+                    if (!this.domElement) return;
+                    
+                    this.domElement.addEventListener('mousedown', (e) => {
+                        this.isMouseDown = true;
+                        this.mouseX = e.clientX;
+                        this.mouseY = e.clientY;
+                    });
+                    
+                    this.domElement.addEventListener('mousemove', (e) => {
+                        if (!this.isMouseDown) return;
+                        
+                        const deltaX = e.clientX - this.mouseX;
+                        const deltaY = e.clientY - this.mouseY;
+                        
+                        this.phi += deltaX * 0.01;
+                        this.theta = Math.max(0.1, Math.min(Math.PI - 0.1, this.theta + deltaY * 0.01));
+                        
+                        this.mouseX = e.clientX;
+                        this.mouseY = e.clientY;
+                    });
+                    
+                    this.domElement.addEventListener('mouseup', () => {
+                        this.isMouseDown = false;
+                    });
+                    
+                    this.domElement.addEventListener('wheel', (e) => {
+                        this.radius = Math.max(this.minDistance, Math.min(this.maxDistance, this.radius + e.deltaY * 0.01));
+                    });
+                }
+                
+                update() {
+                    if (!this.camera || !this.enabled) return;
+                    
+                    // Convert spherical coordinates to cartesian
+                    const x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);
+                    const y = this.radius * Math.cos(this.theta);
+                    const z = this.radius * Math.sin(this.theta) * Math.sin(this.phi);
+                    
+                    this.camera.position.set(x, y, z);
+                    this.camera.lookAt(this.target);
+                }
+            };
+        } else {
+            console.error('❌ Failed to load THREE.js');
+            // Create a minimal THREE fallback
+            window.THREE = {
+                Scene: function() { 
+                    this.children = []; 
+                    this.add = function(obj) { this.children.push(obj); }; 
+                    this.remove = function(obj) { 
+                        const index = this.children.indexOf(obj);
+                        if (index > -1) this.children.splice(index, 1);
+                    };
+                },
+                PerspectiveCamera: function(fov, aspect, near, far) {
+                    this.fov = fov || 75;
+                    this.aspect = aspect || 1;
+                    this.near = near || 0.1;
+                    this.far = far || 1000;
+                    this.position = new THREE.Vector3(0, 0, 0);
+                    this.rotation = {x: 0, y: 0, z: 0};
+                    this.lookAt = function(x, y, z) {
+                        if (typeof x === 'object') {
+                            // lookAt(vector)
+                            return this;
+                        } else {
+                            // lookAt(x, y, z)
+                            return this;
+                        }
+                    };
+                    this.updateProjectionMatrix = function() {};
+                },
+                WebGLRenderer: function(params) { 
+                    console.log('🔧 Using complete fallback WebGLRenderer');
+                    this.domElement = document.createElement('canvas');
+                    this.domElement.style.width = '100%';
+                    this.domElement.style.height = '100%';
+                    this.domElement.style.background = '#1a1a1a';
+                    this.domElement.style.border = '1px solid #333';
+                    
+                    const ctx = this.domElement.getContext('2d');
+                    if (ctx) {
+                        ctx.fillStyle = '#333';
+                        ctx.fillRect(0, 0, 800, 600);
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '20px Arial';
+                        ctx.fillText('3D Renderer (Fallback Mode)', 50, 300);
+                    }
+                    
+                    this.setSize = function(width, height) {
+                        this.domElement.width = width;
+                        this.domElement.height = height;
+                        if (ctx) {
+                            ctx.fillStyle = '#333';
+                            ctx.fillRect(0, 0, width, height);
+                            ctx.fillStyle = '#fff';
+                            ctx.font = '20px Arial';
+                            ctx.fillText('3D Renderer (Fallback Mode)', 50, height/2);
+                        }
+                    };
+                    this.render = function(scene, camera) {};
+                    this.setClearColor = function() {};
+                    this.setPixelRatio = function() {};
+                    this.shadowMap = { enabled: false, type: null };
+                    this.outputColorSpace = null;
+                },
+                Clock: function() { 
+                    this.getDelta = function() { return 0.016; }; 
+                    this.getElapsedTime = function() { return Date.now() / 1000; };
+                },
+                Vector3: function(x, y, z) { 
+                    this.x = x || 0; this.y = y || 0; this.z = z || 0; 
+                    this.set = function(x, y, z) { this.x = x; this.y = y; this.z = z; return this; };
+                    this.copy = function(v) { this.x = v.x; this.y = v.y; this.z = v.z; return this; };
+                    this.clone = function() { return new THREE.Vector3(this.x, this.y, this.z); };
+                },
+                Group: function() { 
+                    this.children = []; 
+                    this.add = function(obj) { this.children.push(obj); }; 
+                    this.position = {x:0,y:0,z:0}; 
+                    this.scale = {set:function(){}}; 
+                },
+                BoxGeometry: function() {},
+                SphereGeometry: function() {},
+                CylinderGeometry: function() {},
+                PlaneGeometry: function() {},
+                MeshPhongMaterial: function() {},
+                MeshBasicMaterial: function() {},
+                TextureLoader: function() { this.load = function() { return {needsUpdate: true}; }; },
+                AnimationMixer: function() { 
+                    this.clipAction = function() { return {play: function(){}, stop: function(){}, setLoop: function(){}}; };
+                    this.update = function() {};
+                },
+                Color: function() { this.setHex = function() { return this; }; },
+                Mesh: function(geometry, material) { 
+                    this.geometry = geometry;
+                    this.material = material;
+                    this.position = new THREE.Vector3(0, 0, 0); 
+                    this.rotation = {x: 0, y: 0, z: 0};
+                    this.scale = {set: function(x, y, z) { return this; }};
+                },
+                DirectionalLight: function(color, intensity) { 
+                    this.color = color || 0xffffff;
+                    this.intensity = intensity || 1;
+                    this.position = new THREE.Vector3(0, 0, 0);
+                    this.target = { position: new THREE.Vector3(0, 0, 0) };
+                },
+                AmbientLight: function(color, intensity) {
+                    this.color = color || 0xffffff;
+                    this.intensity = intensity || 1;
+                },
+                Loader: function() {},
+                GLTFLoader: function() { this.loadAsync = async function() { return {scene: new THREE.Mesh(), animations: []}; }; },
+                OrbitControls: function() { this.update = function() {}; },
+                PCFSoftShadowMap: 1,
+                SRGBColorSpace: 'srgb'
+            };
+        }
+    </script>
+    
+    <script type="module" src="js/main.js"></script>
+</body>
+</html> 

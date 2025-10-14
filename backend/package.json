@@ -1,0 +1,30 @@
+{
+  "name": "heart-backend",
+  "version": "1.0.0",
+  "description": "Backend server for HEART AI Companion with Phantom wallet authentication",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "setup": "node setup.js",
+    "twitter": "node start-twitter-service.js",
+    "twitter-dev": "nodemon start-twitter-service.js",
+    "twitter-proxy": "node twitter-proxy.js"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.6",
+    "bs58": "^5.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "jsonwebtoken": "^9.0.2",
+    "puppeteer": "^24.16.0",
+    "sqlite3": "^5.1.6",
+    "twitter-api-v2": "^1.24.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "type": "module"
+}

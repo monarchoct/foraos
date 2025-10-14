@@ -1,0 +1,120 @@
+{
+  "animations": {
+    "idle": {
+      "description": "Multiple idle animations that rotate randomly",
+      "animations": [
+        "Idle Long",
+        "Idle Offensive",
+        "Idle Random",
+        "Idle Slow"
+      ],
+      "rotationEnabled": true,
+      "minLoops": 5,
+      "maxLoops": 5
+    },
+    "actions": {
+      "description": "Action animations that AI can select from",
+      "animations": [
+        "Agree",
+        "Agreeing",
+        "Angry Gesture",
+        "Annoyed",
+        "Bored",
+        "Dance 1",
+        "Denial",
+        "Hard Head Nod",
+        "Headshake",
+        "Lengthy Head Nod",
+        "Nah",
+        "Quick Nod",
+        "Relieved",
+        "Vibing",
+        "wow"
+      ],
+      "nullChance": 0.0,
+      "playDuringSpeech": true
+    }
+  },
+  "shapekeys": {
+    "blinking": {
+      "description": "Separate left and right eye blinking with 0.25 baseline",
+      "shapekeys": {
+        "leftEye": "left eye blink 02",
+        "rightEye": "right eye blink 02"
+      },
+      "baseline": 0.25,
+      "autoCycle": {
+        "enabled": true,
+        "minInterval": 2000,
+        "maxInterval": 4000,
+        "duration": 300
+      }
+    },
+    "mouthMovement": {
+      "description": "Mouth shapekeys for AI speech selection",
+      "shapekeys": [
+        "mouth speak 04"
+      ],
+      "baseline": {
+        "mouth smile 02": 0
+      },
+      "autoCycle": {
+        "enabled": false,
+        "minInterval": 3000,
+        "maxInterval": 8000,
+        "maxValue": 1.0,
+        "duration": 2000
+      }
+    },
+    "emotions": {
+      "description": "Emotion shapekeys for AI mood selection",
+      "shapekeys": {
+        "surprised": {
+          "mesh": "face_01001",
+          "shapekey": "mouth shout 03"
+        },
+        "happy": {
+          "mesh": "face_01001",
+          "shapekey": "mouth smile 01"
+        },
+        "really happy": {
+          "mesh": "face_01001",
+          "shapekey": "mouth smile 03"
+        },
+        "sad": {
+          "mesh": "face_01001",
+          "shapekey": "mouth sad"
+        },
+        "bored": {
+          "mesh": "face_01001",
+          "shapekey": "left eye droopy"
+        },
+        "concerned": {
+          "mesh": "brows_01001",
+          "shapekey": "left inner up"
+        },
+        "angry": {
+          "mesh": "face_01001",
+          "shapekey": "mouth sad"
+        }
+      },
+      "fadeInDuration": 0.5,
+      "fadeOutDuration": 0.5,
+      "nullChance": 0.3,
+      "disableMouthMovement": true
+    }
+  },
+      "aiSelection": {
+      "prompt": "Based on the message: '{message}', select appropriate animations and expressions. You can be creative and flexible with your choices. For emotions, you can return null if the message doesn't strongly suggest a specific emotion (about 4 in 5 times). For actions, you can return null if no specific action is needed (about 3 in 5 times). Mouth movements should be random from available options.",
+      "selectionRules": {
+        "actions": "Choose action based on message content, mood, or context - be creative and flexible. Can return null if no action is needed (about 3 in 5 times)",
+        "mouthMovement": "Choose mouth shape randomly from available options - any mouth shape works for speech",
+        "emotions": "Choose emotion based on message mood and sentiment. Can return null if no strong emotion is suggested (about 4 in 5 times)"
+      },
+      "defaultSelections": {
+        "mouthMovements": ["mouth speak 04"],
+        "emotions": ["surprised", "happy", "really happy", "sad", "bored", "concerned"],
+        "actions": ["Agree", "Agreeing", "Angry Gesture", "Annoyed", "Bored", "Dance 1", "Denial", "Hard Head Nod", "Headshake", "Lengthy Head Nod", "Nah", "Quick Nod", "Relieved", "Vibing", "wow"]
+      }
+    }
+} 
