@@ -32,13 +32,35 @@ export class ConfigManager {
         try {
             const response = await fetch(path);
             if (!response.ok) {
+                if (response.status === 404) {
+                    console.warn(`⚠️ Config file not found: ${path} - using defaults`);
+                    return this.getDefaultConfig(path);
+                }
                 throw new Error(`Failed to load config: ${response.statusText}`);
             }
             return await response.json();
         } catch (error) {
             console.error(`❌ Error loading config from ${path}:`, error);
-            throw error;
+            console.warn(`⚠️ Using default config for ${path}`);
+            return this.getDefaultConfig(path);
         }
+    }
+
+    getDefaultConfig(path) {
+        if (path.includes('api-keys')) {
+            return {
+                openai: { apiKey: '', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8 },
+                venice: { apiKey: '', baseUrl: 'https://api.venice.ai/api/v1', model: 'claude-3-5-sonnet', maxTokens: 150, temperature: 0.8, characterSlug: '' },
+                elevenlabs: { apiKey: '', baseUrl: 'https://api.elevenlabs.io/v1' },
+                twitter: { apiKey: '', apiSecret: '', accessToken: '', accessTokenSecret: '', bearerToken: '' },
+                twitch: { clientId: '', clientSecret: '', accessToken: '' }
+            };
+        } else if (path.includes('heart-state')) {
+            return { emotions: {}, thoughts: [], memories: [] };
+        } else if (path.includes('memory')) {
+            return { conversations: [], emotionalStates: [] };
+        }
+        return {};
     }
 
     getConfig(configName) {
