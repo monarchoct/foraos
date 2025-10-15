@@ -192,18 +192,17 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call directly (for production) or via proxy (for local dev)
+            // Make OpenAI API call - no backend approach
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
-            // Use direct API call for production, proxy for local dev
             const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             let apiUrl;
             
             if (isLocalDev) {
-                apiUrl = '/api/chat/completions';
+                apiUrl = '/api/chat/completions'; // Vite proxy for local dev
             } else {
-                // Use CORS proxy for production to avoid CORS issues
-                apiUrl = 'https://corsproxy.io/?https%3A%2F%2Fapi.openai.com%2Fv1%2Fchat%2Fcompletions';
+                // Use direct OpenAI API for production (no backend)
+                apiUrl = 'https://api.openai.com/v1/chat/completions';
             }
             
             const response = await fetch(apiUrl, {
