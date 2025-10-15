@@ -127,7 +127,16 @@ Generate a brief, witty reply that ${personality.name} would naturally say:`;
 const aiGenerator = new AIResponseGenerator();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://foraai.net',
+        'https://monarchoct.github.io',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:3000'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 
 // Rate limiting
