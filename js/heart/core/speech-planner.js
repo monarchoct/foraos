@@ -192,10 +192,14 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call through Vite proxy
+            // Make OpenAI API call directly (for production) or via proxy (for local dev)
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
-            const response = await fetch('/api/chat/completions', {
+            // Use direct API call for production, proxy for local dev
+            const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiUrl = isLocalDev ? '/api/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+            
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
