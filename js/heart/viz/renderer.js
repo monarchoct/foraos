@@ -937,7 +937,7 @@ export class Renderer {
             
             // Set animation speed based on type
             if (name.toLowerCase().includes('idle')) {
-                this.activeAction.setEffectiveTimeScale(0.5); // Idle speed
+                this.activeAction.setEffectiveTimeScale(0.75); // Idle speed (50% faster)
             } else {
                 this.activeAction.setEffectiveTimeScale(1.0); // Normal speed for actions
             }
@@ -1019,7 +1019,7 @@ export class Renderer {
         if (this.actions[idleAnimationName]) {
             const idleAction = this.actions[idleAnimationName];
             idleAction.setLoop(THREE.LoopRepeat, Infinity);
-            idleAction.setEffectiveTimeScale(0.15); // Use the slow speed
+            idleAction.setEffectiveTimeScale(0.225); // Use the slow speed
             idleAction.reset();
             idleAction.play();
             
@@ -1042,7 +1042,7 @@ export class Renderer {
         if (this.actions[idleAnimationName]) {
             const idleAction = this.actions[idleAnimationName];
             idleAction.setLoop(THREE.LoopRepeat, Infinity);
-            idleAction.setEffectiveTimeScale(0.15); // Use the slow speed
+            idleAction.setEffectiveTimeScale(0.225); // Use the slow speed
             idleAction.reset();
             idleAction.fadeIn(0.5); // Smooth fade in
             idleAction.play();
@@ -1088,7 +1088,7 @@ export class Renderer {
                 const shorterAction = this.animationMixer.clipAction(shorterClip);
                 shorterAction.setLoop(THREE.LoopRepeat, Infinity);
                 shorterAction.clampWhenFinished = false;
-                shorterAction.setEffectiveTimeScale(0.22); // Set idle speed to 0.15 (even slower)
+                shorterAction.setEffectiveTimeScale(0.33); // Set idle speed (50% faster)
                 
                 // Replace the original action with the shorter one
                 this.activeAction = shorterAction;
