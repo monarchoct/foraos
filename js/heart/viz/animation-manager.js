@@ -997,6 +997,51 @@ export class AnimationManager {
         this.processAISelections(selections);
         
         console.log(`Speech started (duration: ${duration}ms, selections:`, selections);
+        
+        // Set timeout to end speech and fade out emotions
+        setTimeout(() => {
+            this.endSpeech();
+        }, duration);
+    }
+    
+    endSpeech() {
+        console.log(`🎤 ENDING SPEECH`);
+        
+        this.speechState.isSpeaking = false;
+        
+        // Fade out emotions if active
+        if (this.speechState.currentEmotion && this.speechState.emotionCycle.isActive) {
+            console.log(`😊 Fading out emotion: ${this.speechState.currentEmotion}`);
+            this.fadeOutEmotion(this.speechState.currentEmotion);
+        }
+        
+        // Stop mouth movements
+        if (this.speechState.mouthMovementCycle.isActive) {
+            this.speechState.mouthMovementCycle.isActive = false;
+            console.log(`👄 Stopping mouth movements`);
+        }
+        
+        // Stop action animations
+        if (this.speechState.currentAction && window.heartSystem?.renderer?.stopAnimations) {
+            window.heartSystem.renderer.stopAnimations();
+            console.log(`🎬 Stopping action animation: ${this.speechState.currentAction}`);
+        }
+        
+        // Clear speech state
+        this.speechState.currentEmotion = null;
+        this.speechState.currentAction = null;
+        this.speechState.currentMouthMovement = null;
+    }
+    
+    fadeOutEmotion(emotionName) {
+        console.log(`😊 Fading out emotion: ${emotionName}`);
+        
+        // Apply emotion shapekeys with value 0 to fade out
+        this.applyEmotionShapekeys(emotionName, 0.0);
+        
+        // Deactivate emotion cycle
+        this.speechState.emotionCycle.isActive = false;
+        this.speechState.emotionCycle.currentValue = 0.0;
     }
 
     processAISelections(aiSelections) {
@@ -1074,16 +1119,21 @@ export class AnimationManager {
             console.log(`🎭 No action selected for this speech`);
         }
         
-        // Handle emotions (can be null) - DISABLED FOR NOW
-        if (false && aiSelections.emotions && aiSelections.emotions !== 'null' && aiSelections.emotions !== null) {
+        // Handle emotions (can be null) - ENABLED
+        if (aiSelections.emotions && aiSelections.emotions !== 'null' && aiSelections.emotions !== null) {
             this.speechState.currentEmotion = aiSelections.emotions;
-            // Start emotion fade sequence: fade in → hold → fade out
+            console.log(`😊 Processing emotion: ${aiSelections.emotions}`);
+            
+            // Apply emotion shapekeys immediately
+            this.applyEmotionShapekeys(aiSelections.emotions, 1.0); // Set to full value (1.0)
+            
+            // Hold emotion during speech (don't fade out immediately)
             this.speechState.emotionCycle.isActive = true;
             this.speechState.emotionCycle.cycleTime = 0;
-            this.speechState.emotionCycle.currentValue = 0;
-            console.log(`😊 Starting emotion fade sequence: ${aiSelections.emotions} (2.0s total: fade in → hold at 0.8 → fade out)`);
+            this.speechState.emotionCycle.currentValue = 1.0; // Start at full intensity
+            console.log(`😊 Emotion applied and held: ${aiSelections.emotions} at full intensity`);
         } else {
-            console.log(`😐 Emotions disabled for now`);
+            console.log(`😐 No emotion selected`);
         }
         
         if (aiSelections.mouthMovement) {
