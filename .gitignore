@@ -72,3 +72,6 @@ Thumbs.db
 
 # Local API keys (never upload these!)
 # config/api-keys-local.json
+
+# Downloaded reference projects
+three-gltf-viewer/
