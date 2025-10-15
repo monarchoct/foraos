@@ -1,49 +1,86 @@
-// Simple CORS proxy server for OpenAI API
-// This can be hosted on your domain to avoid CORS issues
-
-const express = require('express');
-const cors = require('cors');
-const fetch = require('node-fetch');
+import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3001;
 
-// Enable CORS for all routes
-app.use(cors());
+// Enable CORS for all origins
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Parse JSON bodies
 app.use(express.json());
 
 // Proxy endpoint for OpenAI API
-app.post('/api/openai-proxy', async (req, res) => {
-  try {
-    const { messages, model, max_tokens, temperature, apiKey } = req.body;
-    
-    if (!apiKey) {
-      return res.status(400).json({ error: 'API key required' });
+app.all('/api/openai/*', async (req, res) => {
+    try {
+        console.log(`🔄 Proxying ${req.method} request to OpenAI API`);
+        
+        // Extract the path after /api/openai/
+        const openaiPath = req.path.replace('/api/openai', '');
+        const openaiUrl = `https://api.openai.com${openaiPath}`;
+        
+        console.log(`📍 Target URL: ${openaiUrl}`);
+        
+        // Prepare headers (exclude host and other problematic headers)
+        const headers = {
+            'Content-Type': req.headers['content-type'] || 'application/json',
+            'Authorization': req.headers['authorization']
+        };
+        
+        // Remove undefined headers
+        Object.keys(headers).forEach(key => {
+            if (headers[key] === undefined) {
+                delete headers[key];
+            }
+        });
+        
+        console.log(`📤 Headers:`, headers);
+        console.log(`📦 Body:`, req.body);
+        
+        // Make request to OpenAI
+        const response = await fetch(openaiUrl, {
+            method: req.method,
+            headers: headers,
+            body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined
+        });
+        
+        const data = await response.text();
+        
+        console.log(`📥 Response status: ${response.status}`);
+        console.log(`📥 Response data:`, data);
+        
+        // Set response headers
+        res.status(response.status);
+        response.headers.forEach((value, key) => {
+            if (key.toLowerCase() !== 'content-encoding') {
+                res.setHeader(key, value);
+            }
+        });
+        
+        // Send response
+        res.send(data);
+        
+    } catch (error) {
+        console.error('❌ Proxy error:', error);
+        res.status(500).json({ error: 'Proxy server error', details: error.message });
     }
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model || 'gpt-3.5-turbo',
-        messages: messages,
-        max_tokens: max_tokens || 150,
-        temperature: temperature || 0.8
-      })
-    });
-    
-    const data = await response.json();
-    res.json(data);
-    
-  } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).json({ error: 'Proxy server error' });
-  }
 });
 
-app.listen(PORT, () => {
-  console.log(`CORS proxy server running on port ${PORT}`);
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Proxy server is running' });
 });
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
+    console.log(`🔗 OpenAI API proxy: http://localhost:${PORT}/api/openai/v1/chat/completions`);
+    console.log(`💚 Health check: http://localhost:${PORT}/health`);
+});
+
+export default app;
