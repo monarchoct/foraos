@@ -1191,7 +1191,12 @@ export class Renderer {
 
     setBackgroundTexture(texture) {
         if (this.scene && texture) {
-                this.scene.background = texture;
+            // Prevent background stretching by using proper texture settings
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            this.scene.background = texture;
         }
     }
 
