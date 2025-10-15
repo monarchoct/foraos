@@ -203,6 +203,7 @@ Guidelines:
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKeys.openai.apiKey}`,
+                    'Origin': window.location.origin,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
