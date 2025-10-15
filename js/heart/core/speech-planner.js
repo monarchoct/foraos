@@ -197,7 +197,14 @@ Guidelines:
             
             // Use direct API call for production, proxy for local dev
             const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const apiUrl = isLocalDev ? '/api/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+            let apiUrl;
+            
+            if (isLocalDev) {
+                apiUrl = '/api/chat/completions';
+            } else {
+                // Use CORS proxy for production to avoid CORS issues
+                apiUrl = 'https://corsproxy.io/?https%3A%2F%2Fapi.openai.com%2Fv1%2Fchat%2Fcompletions';
+            }
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
