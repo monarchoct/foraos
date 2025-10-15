@@ -196,7 +196,7 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use same CORS proxy setup for both local and production for faster testing
-            const apiUrl = 'https://thingproxy.freeboard.io/fetch/https://api.openai.com/v1/chat/completions';
+            const apiUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.openai.com/v1/chat/completions');
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
