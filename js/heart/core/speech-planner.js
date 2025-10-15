@@ -201,8 +201,8 @@ Guidelines:
             if (isLocalDev) {
                 apiUrl = '/api/chat/completions'; // Vite proxy for local dev
             } else {
-                // Use direct OpenAI API for production (no backend)
-                apiUrl = 'https://api.openai.com/v1/chat/completions';
+                // Use CORS proxy for production to bypass CORS restrictions
+                apiUrl = 'https://thingproxy.freeboard.io/fetch/https://api.openai.com/v1/chat/completions';
             }
             
             const response = await fetch(apiUrl, {
