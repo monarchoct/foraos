@@ -196,7 +196,7 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use same CORS proxy setup for both local and production for faster testing
-            const apiUrl = 'https://cors-anywhere.herokuapp.com/https://api.openai.com/v1/chat/completions';
+            const apiUrl = 'https://corsproxy.io/?https%3A%2F%2Fapi.openai.com%2Fv1%2Fchat%2Fcompletions';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
