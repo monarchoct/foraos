@@ -152,7 +152,7 @@ export class Renderer {
             
             switch(key) {
                 case 's':
-                    this.logAnimationStatus();
+                this.logAnimationStatus();
                     break;
                 case 'm':
                     // Test multi-animation: play first two available animations
@@ -632,9 +632,9 @@ export class Renderer {
 
                 // Set animation speed based on type
                 if (name.toLowerCase().includes('idle')) {
-                    action.setEffectiveTimeScale(0.70); // Idle speed (30% slower)
+                    action.setEffectiveTimeScale(0.56); // Idle speed (44% slower)
                 } else {
-                    action.setEffectiveTimeScale(0.4); // Action speed (60% slower)
+                    action.setEffectiveTimeScale(0.2); // Action speed (80% slower)
                 }
                 
                 // Configure action animations with proper looping
@@ -754,22 +754,22 @@ export class Renderer {
                 this.modelPath,
                 (gltf) => {
                     console.log('✅ GLB model loaded successfully:', gltf);
-                    console.log('Scene children:', gltf.scene.children.length);
-                    console.log('Animations:', gltf.animations ? gltf.animations.length : 0);
-                    
-                    // Get the main mesh from the loaded model
-                    this.character = gltf.scene;
-                    
+            console.log('Scene children:', gltf.scene.children.length);
+            console.log('Animations:', gltf.animations ? gltf.animations.length : 0);
+            
+            // Get the main mesh from the loaded model
+            this.character = gltf.scene;
+            
                     // Scale the model to appropriate size (15% bigger)
                     this.character.scale.set(0.575, 0.575, 0.575);
-                    
+            
                     // Position character properly (moved down 0.5 on Y)
                     this.character.position.set(0, -0.5, 0);
-                    
-                    // Enable shadows and fix materials for lighting
-                    this.character.traverse((child) => {
-                        if (child.isMesh) {
-                            child.castShadow = true;
+            
+            // Enable shadows and fix materials for lighting
+            this.character.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
                     child.receiveShadow = true;
                     
                     // Ensure geometry has vertex normals for proper lighting
@@ -1149,11 +1149,11 @@ export class Renderer {
             }
             
             // Set animation speed based on type
-        if (name.toLowerCase().includes('idle')) {
+            if (name.toLowerCase().includes('idle')) {
             this.activeAction.setEffectiveTimeScale(0.70); // Idle speed (30% slower)
-        } else {
-            this.activeAction.setEffectiveTimeScale(1.0); // Normal speed for actions
-        }
+            } else {
+                this.activeAction.setEffectiveTimeScale(1.0); // Normal speed for actions
+            }
             
             if (this.previousAction) {
                 // Simple crossfade
@@ -1282,23 +1282,45 @@ export class Renderer {
         }
     }
 
-    // Start first animation with proper looping
+    // Start first animation with proper looping and smooth crossfading
     startFirstAnimation(animationName) {
         console.log(`STARTING ANIMATION: ${animationName}`);
         console.log(`Available actions:`, Object.keys(this.actions));
         console.log(`Looking for action: ${animationName}`);
         
         if (this.actions[animationName]) {
-            this.activeAction = this.actions[animationName];
+            const newAction = this.actions[animationName];
             
-            // Ensure proper looping for idle animations
-            if (animationName.toLowerCase().includes('idle')) {
-                // Create a shorter version of the idle animation
-                const originalClip = this.activeAction._clip;
-                const shorterClip = this.createShorterIdleAnimation(originalClip);
+            // Check if this is an idle animation
+            const isIdle = animationName.toLowerCase().includes('idle');
+            
+            if (isIdle) {
+                // Handle idle animation with smooth crossfade
+                if (this.activeIdleAction && this.activeIdleAction !== newAction) {
+                    console.log(`🔄 Crossfading from ${this.activeIdleAction._clip.name} to ${animationName}`);
+                    // Crossfade from current idle to new idle
+                    this.activeIdleAction.fadeOut(1.0); // 1 second fade out
+                    newAction.reset();
+                    newAction.fadeIn(1.0); // 1 second fade in
+                } else {
+                    // First idle animation or same animation
+                    newAction.reset();
+                    newAction.fadeIn(1.0); // Smooth fade in
+                }
                 
-                // Create new action with the shorter clip
-                const shorterAction = this.animationMixer.clipAction(shorterClip);
+                // Set up the new idle animation
+                newAction.setLoop(THREE.LoopRepeat, Infinity);
+                newAction.clampWhenFinished = false;
+                newAction.play();
+                this.activeIdleAction = newAction;
+                this.currentAnimation = animationName;
+                
+                console.log(`🎭 Started idle animation with smooth transition: ${animationName}`);
+                return;
+            }
+            
+            // Non-idle animations (actions)
+            this.activeAction = newAction;
                 shorterAction.setLoop(THREE.LoopRepeat, Infinity);
                 shorterAction.clampWhenFinished = false;
                 shorterAction.setEffectiveTimeScale(0.30); // Set idle speed (30% slower)
@@ -1409,7 +1431,7 @@ export class Renderer {
             texture.wrapT = THREE.ClampToEdgeWrapping;
             texture.minFilter = THREE.LinearFilter;
             texture.magFilter = THREE.LinearFilter;
-            this.scene.background = texture;
+                this.scene.background = texture;
         }
     }
 

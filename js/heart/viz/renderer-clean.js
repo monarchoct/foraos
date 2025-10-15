@@ -696,9 +696,9 @@ export class Renderer {
 
                 // Set animation speed based on type
                 if (name.toLowerCase().includes('idle')) {
-                    action.setEffectiveTimeScale(0.25); // Idle speed (30% slower)
+                    action.setEffectiveTimeScale(0.20); // Idle speed (50% slower)
                 } else {
-                    action.setEffectiveTimeScale(0.4); // Action speed (60% slower)
+                    action.setEffectiveTimeScale(0.2); // Action speed (80% slower)
                 }
                 
                 // Configure action animations with proper looping
