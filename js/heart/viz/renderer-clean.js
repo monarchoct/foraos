@@ -436,7 +436,7 @@ export class Renderer {
             // Handle idle animation with manual crossfade
             newAction.setLoop(THREE.LoopRepeat, Infinity);
             newAction.clampWhenFinished = false;
-            newAction.setEffectiveTimeScale(0.30); // Set idle speed (15% slower)
+            newAction.setEffectiveTimeScale(0.28); // Set idle speed (20% slower)
             
             if (this.activeIdleAction && this.activeIdleAction !== newAction) {
                 // Start manual crossfade (2 second transition)
