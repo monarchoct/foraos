@@ -1015,19 +1015,50 @@ export class AnimationManager {
                 const currentIdle = this.getCurrentIdleAnimationName();
                 console.log(`🔄 Current idle animation: ${currentIdle}`);
                 
-                // Layer the action animation on top of the idle animation
-                window.heartSystem.renderer.layerAnimations(
-                    currentIdle, 
-                    aiSelections.actions, 
-                    0.7 // 70% weight for the action animation
-                );
+                // Layer the action animation on top of the idle animation with proper settings
+                const actionName = aiSelections.actions;
+                
+                // Get the action and configure it properly
+                if (window.heartSystem?.renderer?.actions?.[actionName]) {
+                    const action = window.heartSystem.renderer.actions[actionName];
+                    
+                    // Configure action animation settings with smooth transition
+                    action.reset();
+                    action.setLoop(THREE.LoopRepeat, 3); // Max 3 loops
+                    action.clampWhenFinished = true;
+                    action.setEffectiveTimeScale(0.4); // 40% slower speed
+                    action.setEffectiveWeight(0); // Start at 0 weight
+                    action.enabled = true;
+                    
+                    // Smooth fade in to prevent T-pose clipping
+                    action.fadeIn(0.8); // 0.8 second fade in
+                    action.play();
+                    
+                    // Gradually increase weight to target after fade-in
+                    setTimeout(() => {
+                        action.setEffectiveWeight(0.7); // Reach target weight
+                    }, 200); // Small delay after fade-in starts
+                    
+                    console.log(`✅ Speech action configured: ${actionName} (3 loops max, 40% speed, smooth transition)`);
+                } else {
+                    // Fallback to layerAnimations method
+                    window.heartSystem.renderer.layerAnimations(
+                        currentIdle, 
+                        actionName, 
+                        0.7 // 70% weight for the action animation
+                    );
+                }
                 
                 console.log(`✅ Speech action layered on idle: ${aiSelections.actions} (70% weight)`);
                 
-                // Set up automatic fade out after speech duration
+                // Set up automatic fade out after speech duration with smooth transition
                 setTimeout(() => {
-                    if (window.heartSystem?.renderer?.stopAnimations) {
-                        window.heartSystem.renderer.stopAnimations([aiSelections.actions], 0.5);
+                    if (window.heartSystem?.renderer?.actions?.[aiSelections.actions]) {
+                        const action = window.heartSystem.renderer.actions[aiSelections.actions];
+                        action.fadeOut(1.0); // 1 second smooth fade out
+                        console.log(`🛑 Speech action fading out: ${aiSelections.actions}`);
+                    } else if (window.heartSystem?.renderer?.stopAnimations) {
+                        window.heartSystem.renderer.stopAnimations([aiSelections.actions], 1.0);
                         console.log(`🛑 Speech action faded out: ${aiSelections.actions}`);
                     }
                 }, this.speechState.speechDuration || 3000);
