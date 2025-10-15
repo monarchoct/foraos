@@ -936,11 +936,11 @@ export class Renderer {
             }
             
             // Set animation speed based on type
-            if (name.toLowerCase().includes('idle')) {
-                this.activeAction.setEffectiveTimeScale(0.75); // Idle speed (50% faster)
-            } else {
-                this.activeAction.setEffectiveTimeScale(1.0); // Normal speed for actions
-            }
+        if (name.toLowerCase().includes('idle')) {
+            this.activeAction.setEffectiveTimeScale(0.85); // Idle speed (15% slower)
+        } else {
+            this.activeAction.setEffectiveTimeScale(1.0); // Normal speed for actions
+        }
             
             if (this.previousAction) {
                 // Simple crossfade
@@ -1088,7 +1088,7 @@ export class Renderer {
                 const shorterAction = this.animationMixer.clipAction(shorterClip);
                 shorterAction.setLoop(THREE.LoopRepeat, Infinity);
                 shorterAction.clampWhenFinished = false;
-                shorterAction.setEffectiveTimeScale(0.33); // Set idle speed (50% faster)
+                shorterAction.setEffectiveTimeScale(0.37); // Set idle speed (15% slower)
                 
                 // Replace the original action with the shorter one
                 this.activeAction = shorterAction;
