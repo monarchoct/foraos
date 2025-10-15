@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ForaAI - AI Companion</title>
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
     <div id="app">
@@ -80,23 +80,17 @@
             <!-- Settings Mode -->
             <div class="input-interface settings-mode">
                 <div class="settings-container">
-                    <div class="settings-section">
-                        <h3>Background Settings</h3>
-                        <div class="setting-item">
-                            <label for="background-upload">Upload Background:</label>
-                            <input type="file" id="background-upload" accept="image/*" class="setting-file">
-                        </div>
-                        <div class="setting-item">
-                            <label for="background-reset">Reset Background:</label>
-                            <button id="background-reset" class="reset-button">
-                                Reset to Default
-                            </button>
-                        </div>
-                        <div class="setting-item">
-                            <label for="background-darkness">Background Darkness:</label>
-                            <input type="range" id="background-darkness" min="1" max="100" value="50" class="darkness-slider">
-                            <span id="darkness-value">50%</span>
-                        </div>
+                    <div class="setting-item">
+                        <input type="file" id="background-upload" accept="image/*" class="setting-file" title="Choose Background">
+                    </div>
+                    <div class="setting-item">
+                        <button id="background-reset" class="reset-button">
+                            Reset to Default
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <input type="range" id="background-darkness" min="1" max="100" value="50" class="darkness-slider">
+                        <span id="darkness-value">50%</span>
                     </div>
                 </div>
             </div>
