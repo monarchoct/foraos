@@ -193,8 +193,8 @@ Guidelines:
             });
             
             // Make OpenAI API call through CORS proxy that supports headers
-            // Try different proxy based on Team Human's URL insight
-            const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+            // Try thingproxy which is more reliable for API calls
+            const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
             const apiUrl = 'https://api.openai.com/v1/chat/completions';
             
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
