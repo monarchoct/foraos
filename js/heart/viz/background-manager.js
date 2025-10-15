@@ -46,13 +46,14 @@ export class BackgroundManager {
             
             // 🖼️ Image backgrounds (add your images here)
             anime1: { type: 'image', path: 'backgrounds/anime1.png', name: 'Anime Landscape' },
+            neon12: { type: 'image', path: 'backgrounds/neon12.png', name: 'Neon 12 Background' },
             // Example: sunny_sky: { type: 'image', path: 'backgrounds/sunny_sky.png', name: 'Sunny Sky Image' },
             // Example: night_city: { type: 'image', path: 'backgrounds/night_city.jpg', name: 'Night City' },
             // Example: forest_path: { type: 'image', path: 'backgrounds/forest_path.png', name: 'Forest Path' }
         };
         
-        // Set anime background as default
-        this.currentBackground = 'anime1';
+        // Set neon12 background as default
+        this.currentBackground = 'neon12';
         
         // Removed mood-based background mappings - backgrounds now change automatically only
         // this.moodBackgrounds = { ... };
