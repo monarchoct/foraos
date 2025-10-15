@@ -156,7 +156,7 @@ Guidelines:
                 return this.generateFallbackResponse(input);
             }
             
-            console.log('🤖 Generating AI response with OpenAI... (v4 - cors-anywhere)');
+            console.log('🤖 Generating AI response with OpenAI...');
             
             // Get conversation history for context
             const recentConversations = this.heartState.memoryManager?.getRecentConversations(10) || [];
@@ -192,15 +192,18 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call through reliable CORS proxy
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const apiUrl = 'https://api.openai.com/v1/chat/completions';
+            // Make OpenAI API call through CORS proxy that supports headers
+            const proxyUrl = 'https://corsproxy.io/?';
+            const apiUrl = encodeURIComponent('https://api.openai.com/v1/chat/completions');
+            
+            console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             const response = await fetch(proxyUrl + apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`
+                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     model: apiKeys.openai.model || 'gpt-3.5-turbo',
