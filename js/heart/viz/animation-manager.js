@@ -1026,7 +1026,7 @@ export class AnimationManager {
                     action.reset();
                     action.setLoop(THREE.LoopRepeat, 3); // Max 3 loops
                     action.clampWhenFinished = true;
-                    action.setEffectiveTimeScale(0.4); // 40% slower speed
+                    action.setEffectiveTimeScale(0.2); // 80% slower speed
                     action.setEffectiveWeight(0); // Start at 0 weight
                     action.enabled = true;
                     

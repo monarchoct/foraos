@@ -25,6 +25,7 @@
         "Hard Head Nod",
         "Headshake",
         "Lengthy Head Nod",
+        "Looking Idle",
         "Nah",
         "Quick Nod",
         "Relieved",
@@ -53,7 +54,8 @@
     "mouthMovement": {
       "description": "Mouth shapekeys for AI speech selection",
       "shapekeys": [
-        "mouth speak 04"
+        "mouth speak 04",
+        "mouth speak 03"
       ],
       "baseline": {
         "mouth smile 02": 0
@@ -66,43 +68,104 @@
         "duration": 2000
       }
     },
-    "emotions": {
-      "description": "Emotion shapekeys for AI mood selection",
-      "shapekeys": {
-        "surprised": {
-          "mesh": "face_01001",
-          "shapekey": "mouth shout 03"
+      "emotions": {
+        "description": "Emotion shapekeys for AI mood selection - each emotion uses 4 shapekeys for consistent expression",
+        "shapekeys": {
+          "confused": {
+            "shapekey1": {
+              "mesh": "brows_01001",
+              "shapekey": "left surprised",
+              "value": 1.0
+            },
+            "shapekey2": {
+              "mesh": "brows_01001", 
+              "shapekey": "right surprised",
+              "value": 1.0
+            },
+            "shapekey3": {
+              "mesh": "face_01001",
+              "shapekey": "left eye slant", 
+              "value": 1.0
+            },
+            "shapekey4": {
+              "mesh": "face_01001",
+              "shapekey": "right eye slant",
+              "value": 1.0
+            }
+          },
+          "angry": {
+            "shapekey1": {
+              "mesh": "brows_01001",
+              "shapekey": "left angry",
+              "value": 1.0
+            },
+            "shapekey2": {
+              "mesh": "brows_01001", 
+              "shapekey": "right angry",
+              "value": 1.0
+            },
+            "shapekey3": {
+              "mesh": "face_01001",
+              "shapekey": "left eye angry", 
+              "value": 1.0
+            },
+            "shapekey4": {
+              "mesh": "face_01001",
+              "shapekey": "right eye angry",
+              "value": 1.0
+            }
+          },
+          "thinking": {
+            "shapekey1": {
+              "mesh": "brows_01001",
+              "shapekey": "left down",
+              "value": 1.0
+            },
+            "shapekey2": {
+              "mesh": "brows_01001", 
+              "shapekey": "right down",
+              "value": 1.0
+            },
+            "shapekey3": {
+              "mesh": "face_01001",
+              "shapekey": "left eye lower lid up", 
+              "value": 1.0
+            },
+            "shapekey4": {
+              "mesh": "face_01001",
+              "shapekey": "right eye lower lid up",
+              "value": 1.0
+            }
+          },
+          "sad": {
+            "shapekey1": {
+              "mesh": "brows_01001",
+              "shapekey": "left inner up",
+              "value": 1.0
+            },
+            "shapekey2": {
+              "mesh": "brows_01001", 
+              "shapekey": "right inner up",
+              "value": 1.0
+            },
+            "shapekey3": {
+              "mesh": "face_01001",
+              "shapekey": "left eye widen 02", 
+              "value": 1.0
+            },
+            "shapekey4": {
+              "mesh": "face_01001",
+              "shapekey": "right eye widen 02",
+              "value": 1.0
+            }
+          }
         },
-        "happy": {
-          "mesh": "face_01001",
-          "shapekey": "mouth smile 01"
-        },
-        "really happy": {
-          "mesh": "face_01001",
-          "shapekey": "mouth smile 03"
-        },
-        "sad": {
-          "mesh": "face_01001",
-          "shapekey": "mouth sad"
-        },
-        "bored": {
-          "mesh": "face_01001",
-          "shapekey": "left eye droopy"
-        },
-        "concerned": {
-          "mesh": "brows_01001",
-          "shapekey": "left inner up"
-        },
-        "angry": {
-          "mesh": "face_01001",
-          "shapekey": "mouth sad"
-        }
-      },
-      "fadeInDuration": 0.5,
-      "fadeOutDuration": 0.5,
-      "nullChance": 0.3,
-      "disableMouthMovement": true
-    }
+        "fadeInDuration": 1.0,
+        "fadeOutDuration": 1.0,
+        "nullChance": 0.4,
+        "holdDuringSpeech": true,
+        "disableMouthMovement": false
+      }
   },
       "aiSelection": {
       "prompt": "Based on the message: '{message}', select appropriate animations and expressions. You can be creative and flexible with your choices. For emotions, you can return null if the message doesn't strongly suggest a specific emotion (about 4 in 5 times). For actions, you can return null if no specific action is needed (about 3 in 5 times). Mouth movements should be random from available options.",
@@ -111,10 +174,10 @@
         "mouthMovement": "Choose mouth shape randomly from available options - any mouth shape works for speech",
         "emotions": "Choose emotion based on message mood and sentiment. Can return null if no strong emotion is suggested (about 4 in 5 times)"
       },
-      "defaultSelections": {
-        "mouthMovements": ["mouth speak 04"],
-        "emotions": ["surprised", "happy", "really happy", "sad", "bored", "concerned"],
-        "actions": ["Agree", "Agreeing", "Angry Gesture", "Annoyed", "Bored", "Dance 1", "Denial", "Hard Head Nod", "Headshake", "Lengthy Head Nod", "Nah", "Quick Nod", "Relieved", "Vibing", "wow"]
-      }
+        "defaultSelections": {
+          "mouthMovements": ["mouth speak 04", "mouth speak 03"],
+          "emotions": ["confused", "angry", "thinking", "sad"],
+          "actions": ["Agree", "Agreeing", "Angry Gesture", "Annoyed", "Bored", "Dance 1", "Denial", "Hard Head Nod", "Headshake", "Lengthy Head Nod", "Looking Idle", "Nah", "Quick Nod", "Relieved", "Vibing", "wow"]
+        }
     }
 } 
