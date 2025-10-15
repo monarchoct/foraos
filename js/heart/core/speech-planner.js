@@ -192,15 +192,10 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call through CORS proxy that supports headers
-            // Try thingproxy which is more reliable for API calls
-            const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
-            const apiUrl = 'https://api.openai.com/v1/chat/completions';
-            
+            // Make OpenAI API call directly (no proxy)
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
-            console.log('🌐 Proxy URL:', proxyUrl + apiUrl);
             
-            const response = await fetch(proxyUrl + apiUrl, {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
