@@ -195,15 +195,8 @@ Guidelines:
             // Make OpenAI API call - no backend approach
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
-            const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            let apiUrl;
-            
-            if (isLocalDev) {
-                apiUrl = '/api/chat/completions'; // Vite proxy for local dev
-            } else {
-                // Use CORS proxy for production to bypass CORS restrictions
-                apiUrl = 'https://thingproxy.freeboard.io/fetch/https://api.openai.com/v1/chat/completions';
-            }
+            // Use same CORS proxy setup for both local and production for faster testing
+            const apiUrl = 'https://thingproxy.freeboard.io/fetch/https://api.openai.com/v1/chat/completions';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
