@@ -156,7 +156,7 @@ Guidelines:
                 return this.generateFallbackResponse(input);
             }
             
-            console.log('🤖 Generating AI response with OpenAI...');
+            console.log('🤖 Generating AI response with OpenAI... (v4 - cors-anywhere)');
             
             // Get conversation history for context
             const recentConversations = this.heartState.memoryManager?.getRecentConversations(10) || [];
@@ -192,9 +192,9 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call through CORS proxy that supports headers
-            const proxyUrl = 'https://corsproxy.io/?';
-            const apiUrl = encodeURIComponent('https://api.openai.com/v1/chat/completions');
+            // Make OpenAI API call through reliable CORS proxy
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = 'https://api.openai.com/v1/chat/completions';
             
             const response = await fetch(proxyUrl + apiUrl, {
                 method: 'POST',
