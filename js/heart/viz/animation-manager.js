@@ -1002,32 +1002,45 @@ export class AnimationManager {
     processAISelections(aiSelections) {
         console.log(`🚨 PROCESS AI SELECTIONS CALLED:`, aiSelections);
         
-        // Apply AI-selected animations and shapekeys - ACTIONS DISABLED FOR NOW
-        if (false && aiSelections.actions && aiSelections.actions !== 'null' && aiSelections.actions !== null) {
+        // Apply AI-selected animations using multi-animation system
+        if (aiSelections.actions && aiSelections.actions !== 'null' && aiSelections.actions !== null) {
             this.speechState.currentAction = aiSelections.actions;
-            console.log(`Selected action: ${aiSelections.actions}`);
-            console.log(`Available actions in renderer:`, Object.keys(window.heartSystem?.renderer?.actions || {}));
-            console.log(`Action exists in renderer:`, window.heartSystem?.renderer?.actions?.[aiSelections.actions] ? 'YES' : 'NO');
+            console.log(`🎬 Selected action: ${aiSelections.actions}`);
             
-            // Debug the condition check
-            console.log(`🔍 Debug - animationConfig available:`, !!this.animationConfig);
-            console.log(`🔍 Debug - playDuringSpeech setting:`, this.animationConfig?.animations?.actions?.playDuringSpeech);
-            console.log(`🔍 Debug - renderer available:`, !!window.heartSystem?.renderer);
-            
-            // Play the action animation if configured to play during speech
-            if (this.animationConfig?.animations?.actions?.playDuringSpeech && window.heartSystem?.renderer) {
-                console.log(`🎬 Playing speech action: ${aiSelections.actions}`);
-                console.log(`Renderer available:`, !!window.heartSystem?.renderer);
-                console.log(`Actions available:`, Object.keys(window.heartSystem?.renderer?.actions || {}));
+            // Use new multi-animation system to layer action on top of idle
+            if (window.heartSystem?.renderer?.playMultipleAnimations) {
+                console.log(`🎭 Using multi-animation system for speech action`);
                 
-                // Use the force action approach with crossfading and slower speed
-                this.playSpeechActionAnimation(aiSelections.actions);
-                console.log(`✅ Speech action started: ${aiSelections.actions}`);
+                // Get current idle animation name
+                const currentIdle = this.getCurrentIdleAnimationName();
+                console.log(`🔄 Current idle animation: ${currentIdle}`);
+                
+                // Layer the action animation on top of the idle animation
+                window.heartSystem.renderer.layerAnimations(
+                    currentIdle, 
+                    aiSelections.actions, 
+                    0.7 // 70% weight for the action animation
+                );
+                
+                console.log(`✅ Speech action layered on idle: ${aiSelections.actions} (70% weight)`);
+                
+                // Set up automatic fade out after speech duration
+                setTimeout(() => {
+                    if (window.heartSystem?.renderer?.stopAnimations) {
+                        window.heartSystem.renderer.stopAnimations([aiSelections.actions], 0.5);
+                        console.log(`🛑 Speech action faded out: ${aiSelections.actions}`);
+                    }
+                }, this.speechState.speechDuration || 3000);
+                
             } else {
-                console.log(`Action not played - playDuringSpeech: ${this.animationConfig?.animations?.actions?.playDuringSpeech}, renderer: ${!!window.heartSystem?.renderer}`);
+                console.warn(`⚠️ Multi-animation system not available, falling back to old method`);
+                // Fallback to old method if multi-animation not available
+                if (window.heartSystem?.renderer?.actions?.[aiSelections.actions]) {
+                    this.playSpeechActionAnimation(aiSelections.actions);
+                }
             }
         } else {
-            console.log(`🎭 Actions disabled for now`);
+            console.log(`🎭 No action selected for this speech`);
         }
         
         // Handle emotions (can be null) - DISABLED FOR NOW
@@ -1056,6 +1069,39 @@ export class AnimationManager {
             this.speechState.mouthMovementCycle.cycleDuration = fastestMin + Math.random() * (fastestMax - fastestMin);
             console.log(`🎤 Starting mouth movement cycling with: ${aiSelections.mouthMovement} (speed: ${this.speechState.mouthMovementCycle.cycleDuration.toFixed(2)}s)`);
         }
+    }
+
+    // Helper method to get current idle animation name for multi-animation system
+    getCurrentIdleAnimationName() {
+        // Try to get current idle animation from renderer
+        if (window.heartSystem?.renderer?.currentAnimation) {
+            const currentAnim = window.heartSystem.renderer.currentAnimation;
+            if (currentAnim.toLowerCase().includes('idle')) {
+                return currentAnim;
+            }
+        }
+        
+        // Try to get from active idle action
+        if (window.heartSystem?.renderer?.activeIdleAction) {
+            const idleAction = window.heartSystem.renderer.activeIdleAction;
+            if (idleAction._clip && idleAction._clip.name.toLowerCase().includes('idle')) {
+                return idleAction._clip.name;
+            }
+        }
+        
+        // Fallback: look for any idle animation in available actions
+        if (window.heartSystem?.renderer?.actions) {
+            const actions = window.heartSystem.renderer.actions;
+            for (const [name, action] of Object.entries(actions)) {
+                if (name.toLowerCase().includes('idle')) {
+                    return name;
+                }
+            }
+        }
+        
+        // Final fallback
+        console.warn('⚠️ No idle animation found, using fallback');
+        return 'idle'; // Generic fallback
     }
 
     // Main update loop

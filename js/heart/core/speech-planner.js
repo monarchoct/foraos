@@ -196,15 +196,13 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use same CORS proxy setup for both local and production for faster testing
-            const apiUrl = 'https://cors-anywhere.herokuapp.com/https://api.openai.com/v1/chat/completions';
+            const apiUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.openai.com/v1/chat/completions');
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`,
-                    'Origin': 'https://foraai.net',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`
                 },
                 body: JSON.stringify({
                     model: apiKeys.openai.model || 'gpt-3.5-turbo',
