@@ -192,8 +192,8 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call through CORS proxy
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            // Make OpenAI API call through CORS proxy that supports headers
+            const proxyUrl = 'https://corsproxy.io/?';
             const apiUrl = encodeURIComponent('https://api.openai.com/v1/chat/completions');
             
             const response = await fetch(proxyUrl + apiUrl, {
