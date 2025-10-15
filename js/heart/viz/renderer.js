@@ -22,6 +22,11 @@ export class Renderer {
         this.activeAction = null;
         this.previousAction = null;
         
+        // Multi-animation system (inspired by three-gltf-viewer)
+        this.activeActions = {}; // Track multiple active animations
+        this.actionStates = {}; // Track state of each animation
+        this.animationWeights = {}; // Weight/blending for layered animations
+        
         // Animation transition system
         this.currentAnimation = null;
         this.isAnimating = false;
@@ -141,14 +146,70 @@ export class Renderer {
     }
 
     setupKeyboardControls() {
-        // Log animation status with 'S' key
+        // Multi-animation keyboard controls
         document.addEventListener('keydown', (event) => {
-            if (event.key.toLowerCase() === 's') {
-                this.logAnimationStatus();
+            const key = event.key.toLowerCase();
+            
+            switch(key) {
+                case 's':
+                    this.logAnimationStatus();
+                    break;
+                case 'm':
+                    // Test multi-animation: play first two available animations
+                    const animationNames = Object.keys(this.actions);
+                    if (animationNames.length >= 2) {
+                        this.playMultipleAnimations([animationNames[0], animationNames[1]], {
+                            weights: { [animationNames[0]]: 1.0, [animationNames[1]]: 0.5 }
+                        });
+                    }
+                    break;
+                case 'a':
+                    // Play all animations
+                    this.playAllAnimations();
+                    break;
+                case 'l':
+                    // Test animation layering (idle + another animation)
+                    const animations = Object.keys(this.actions);
+                    const idleAnim = animations.find(name => name.toLowerCase().includes('idle'));
+                    const otherAnim = animations.find(name => !name.toLowerCase().includes('idle'));
+                    if (idleAnim && otherAnim) {
+                        this.layerAnimations(idleAnim, otherAnim, 0.3);
+                    }
+                    break;
+                case 'x':
+                    // Stop all multi-animations
+                    this.stopAllMultiAnimations();
+                    break;
+                case '1':
+                    // Test weight adjustment
+                    const activeAnims = Object.keys(this.activeActions);
+                    if (activeAnims.length >= 2) {
+                        this.updateAnimationWeights({
+                            [activeAnims[0]]: 1.0,
+                            [activeAnims[1]]: 0.2
+                        });
+                    }
+                    break;
+                case '2':
+                    // Test different weight adjustment
+                    const activeAnims2 = Object.keys(this.activeActions);
+                    if (activeAnims2.length >= 2) {
+                        this.updateAnimationWeights({
+                            [activeAnims2[0]]: 0.2,
+                            [activeAnims2[1]]: 1.0
+                        });
+                    }
+                    break;
             }
         });
         
-        console.log('⌨️ Keyboard controls: Press "S" to log animation status');
+        console.log('⌨️ Multi-Animation Keyboard Controls:');
+        console.log('   S - Log animation status');
+        console.log('   M - Play multiple animations (first two)');
+        console.log('   A - Play all animations');
+        console.log('   L - Layer animations (idle + another)');
+        console.log('   X - Stop all multi-animations');
+        console.log('   1/2 - Adjust animation weights');
     }
 
     resetCameraView() {
@@ -529,6 +590,152 @@ export class Renderer {
         } else {
             console.log('ANIMATION STATUS: No active animation');
         }
+        
+        // Log multi-animation status
+        if (Object.keys(this.activeActions).length > 0) {
+            console.log('MULTI-ANIMATION STATUS:');
+            Object.entries(this.activeActions).forEach(([name, action]) => {
+                console.log(`   ${name}: Running=${action.isRunning()}, Weight=${action.getEffectiveWeight().toFixed(2)}`);
+            });
+        }
+    }
+
+    // Multi-animation system methods (inspired by three-gltf-viewer)
+    
+    /**
+     * Play multiple animations simultaneously
+     * @param {string[]} animationNames - Array of animation names to play
+     * @param {Object} options - Options for multi-animation
+     */
+    playMultipleAnimations(animationNames, options = {}) {
+        const {
+            weights = {}, // Custom weights for each animation
+            fadeInDuration = 0.5,
+            blendMode = 'additive' // 'additive' or 'override'
+        } = options;
+
+        console.log(`🎭 Playing multiple animations: ${animationNames.join(', ')}`);
+
+        animationNames.forEach(name => {
+            if (this.actions[name]) {
+                // Get or create action
+                let action = this.activeActions[name];
+                if (!action) {
+                    action = this.animationMixer.clipAction(this.actions[name]._clip);
+                    this.activeActions[name] = action;
+                }
+
+                // Set weight (default to 1.0 if not specified)
+                const weight = weights[name] !== undefined ? weights[name] : 1.0;
+                action.setEffectiveWeight(weight);
+                this.animationWeights[name] = weight;
+
+                // Set animation speed based on type
+                if (name.toLowerCase().includes('idle')) {
+                    action.setEffectiveTimeScale(0.70); // Idle speed (30% slower)
+                } else {
+                    action.setEffectiveTimeScale(1.0); // Normal speed for actions
+                }
+
+                // Play the action
+                action.reset().fadeIn(fadeInDuration).play();
+                this.actionStates[name] = true;
+
+                console.log(`   ▶️ Started: ${name} (weight: ${weight})`);
+            } else {
+                console.warn(`   ⚠️ Animation '${name}' not found`);
+            }
+        });
+    }
+
+    /**
+     * Stop specific animations while keeping others running
+     * @param {string[]} animationNames - Animations to stop
+     * @param {number} fadeOutDuration - Fade out duration
+     */
+    stopAnimations(animationNames, fadeOutDuration = 0.5) {
+        console.log(`🛑 Stopping animations: ${animationNames.join(', ')}`);
+
+        animationNames.forEach(name => {
+            const action = this.activeActions[name];
+            if (action && action.isRunning()) {
+                action.fadeOut(fadeOutDuration);
+                this.actionStates[name] = false;
+                console.log(`   ⏹️ Stopped: ${name}`);
+            }
+        });
+    }
+
+    /**
+     * Update animation weights for blending
+     * @param {Object} weights - New weights for animations
+     * @param {number} fadeDuration - Duration for weight transitions
+     */
+    updateAnimationWeights(weights, fadeDuration = 0.3) {
+        Object.entries(weights).forEach(([name, weight]) => {
+            const action = this.activeActions[name];
+            if (action) {
+                action.setEffectiveWeight(weight);
+                this.animationWeights[name] = weight;
+                console.log(`   📊 Updated weight for ${name}: ${weight}`);
+            }
+        });
+    }
+
+    /**
+     * Play all available animations (like three-gltf-viewer's playAllClips)
+     */
+    playAllAnimations() {
+        const allAnimations = Object.keys(this.actions);
+        console.log(`🎬 Playing all animations: ${allAnimations.join(', ')}`);
+        
+        // Set lower weights so they don't overpower each other
+        const weights = {};
+        allAnimations.forEach(name => {
+            weights[name] = 0.5; // Lower weight for all animations
+        });
+        
+        this.playMultipleAnimations(allAnimations, { weights });
+    }
+
+    /**
+     * Stop all multi-animations and return to single animation mode
+     */
+    stopAllMultiAnimations() {
+        console.log('🛑 Stopping all multi-animations');
+        
+        Object.keys(this.activeActions).forEach(name => {
+            const action = this.activeActions[name];
+            if (action && action.isRunning()) {
+                action.fadeOut(0.5);
+                this.actionStates[name] = false;
+            }
+        });
+        
+        this.activeActions = {};
+        this.actionStates = {};
+        this.animationWeights = {};
+    }
+
+    /**
+     * Layer animations with different weights (e.g., idle + facial expression)
+     * @param {string} baseAnimation - Base animation (usually idle)
+     * @param {string} layerAnimation - Animation to layer on top
+     * @param {number} layerWeight - Weight of the layered animation (0-1)
+     */
+    layerAnimations(baseAnimation, layerAnimation, layerWeight = 0.5) {
+        console.log(`🎭 Layering animations: ${baseAnimation} + ${layerAnimation} (weight: ${layerWeight})`);
+        
+        // Play base animation with full weight
+        this.playMultipleAnimations([baseAnimation], { weights: { [baseAnimation]: 1.0 } });
+        
+        // Add layer animation with specified weight
+        setTimeout(() => {
+            this.playMultipleAnimations([layerAnimation], { 
+                weights: { [layerAnimation]: layerWeight },
+                fadeInDuration: 0.3
+            });
+        }, 100);
     }
 
     async loadGLBModel() {

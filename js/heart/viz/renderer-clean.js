@@ -47,6 +47,11 @@ export class Renderer {
         this.idleWeight = 1.0;
         this.actionWeight = 0.0;
         
+        // Multi-animation system (inspired by three-gltf-viewer)
+        this.activeActions = {}; // Track multiple active animations
+        this.actionStates = {}; // Track state of each animation
+        this.animationWeights = {}; // Weight/blending for layered animations
+        
         // Manual crossfade system
         this.crossfadeState = {
             isCrossfading: false,
@@ -657,6 +662,172 @@ export class Renderer {
     resetTransitionPlane() {
         // Clean renderer doesn't use transition planes, so this is a no-op
         // This method exists for compatibility with the background manager
+    }
+
+    // Multi-animation system methods (inspired by three-gltf-viewer)
+    
+    /**
+     * Play multiple animations simultaneously
+     * @param {string[]} animationNames - Array of animation names to play
+     * @param {Object} options - Options for multi-animation
+     */
+    playMultipleAnimations(animationNames, options = {}) {
+        const {
+            weights = {}, // Custom weights for each animation
+            fadeInDuration = 0.5,
+            blendMode = 'additive' // 'additive' or 'override'
+        } = options;
+
+        console.log(`🎭 Playing multiple animations: ${animationNames.join(', ')}`);
+
+        animationNames.forEach(name => {
+            if (this.actions[name]) {
+                // Get or create action
+                let action = this.activeActions[name];
+                if (!action) {
+                    action = this.animationMixer.clipAction(this.actions[name]._clip);
+                    this.activeActions[name] = action;
+                }
+
+                // Set weight (default to 1.0 if not specified)
+                const weight = weights[name] !== undefined ? weights[name] : 1.0;
+                action.setEffectiveWeight(weight);
+                this.animationWeights[name] = weight;
+
+                // Set animation speed based on type
+                if (name.toLowerCase().includes('idle')) {
+                    action.setEffectiveTimeScale(0.25); // Idle speed (30% slower)
+                } else {
+                    action.setEffectiveTimeScale(1.0); // Normal speed for actions
+                }
+
+                // Play the action
+                action.reset().fadeIn(fadeInDuration).play();
+                this.actionStates[name] = true;
+
+                console.log(`   ▶️ Started: ${name} (weight: ${weight})`);
+            } else {
+                console.warn(`   ⚠️ Animation '${name}' not found`);
+            }
+        });
+    }
+
+    /**
+     * Stop specific animations while keeping others running
+     * @param {string[]} animationNames - Animations to stop
+     * @param {number} fadeOutDuration - Fade out duration
+     */
+    stopAnimations(animationNames, fadeOutDuration = 0.5) {
+        console.log(`🛑 Stopping animations: ${animationNames.join(', ')}`);
+
+        animationNames.forEach(name => {
+            const action = this.activeActions[name];
+            if (action && action.isRunning()) {
+                action.fadeOut(fadeOutDuration);
+                this.actionStates[name] = false;
+                console.log(`   ⏹️ Stopped: ${name}`);
+            }
+        });
+    }
+
+    /**
+     * Update animation weights for blending
+     * @param {Object} weights - New weights for animations
+     * @param {number} fadeDuration - Duration for weight transitions
+     */
+    updateAnimationWeights(weights, fadeDuration = 0.3) {
+        Object.entries(weights).forEach(([name, weight]) => {
+            const action = this.activeActions[name];
+            if (action) {
+                action.setEffectiveWeight(weight);
+                this.animationWeights[name] = weight;
+                console.log(`   📊 Updated weight for ${name}: ${weight}`);
+            }
+        });
+    }
+
+    /**
+     * Play all available animations (like three-gltf-viewer's playAllClips)
+     */
+    playAllAnimations() {
+        const allAnimations = Object.keys(this.actions);
+        console.log(`🎬 Playing all animations: ${allAnimations.join(', ')}`);
+        
+        // Set lower weights so they don't overpower each other
+        const weights = {};
+        allAnimations.forEach(name => {
+            weights[name] = 0.5; // Lower weight for all animations
+        });
+        
+        this.playMultipleAnimations(allAnimations, { weights });
+    }
+
+    /**
+     * Stop all multi-animations and return to single animation mode
+     */
+    stopAllMultiAnimations() {
+        console.log('🛑 Stopping all multi-animations');
+        
+        Object.keys(this.activeActions).forEach(name => {
+            const action = this.activeActions[name];
+            if (action && action.isRunning()) {
+                action.fadeOut(0.5);
+                this.actionStates[name] = false;
+            }
+        });
+        
+        this.activeActions = {};
+        this.actionStates = {};
+        this.animationWeights = {};
+    }
+
+    /**
+     * Layer animations with different weights (e.g., idle + facial expression)
+     * @param {string} baseAnimation - Base animation (usually idle)
+     * @param {string} layerAnimation - Animation to layer on top
+     * @param {number} layerWeight - Weight of the layered animation (0-1)
+     */
+    layerAnimations(baseAnimation, layerAnimation, layerWeight = 0.5) {
+        console.log(`🎭 Layering animations: ${baseAnimation} + ${layerAnimation} (weight: ${layerWeight})`);
+        
+        // Play base animation with full weight
+        this.playMultipleAnimations([baseAnimation], { weights: { [baseAnimation]: 1.0 } });
+        
+        // Add layer animation with specified weight
+        setTimeout(() => {
+            this.playMultipleAnimations([layerAnimation], { 
+                weights: { [layerAnimation]: layerWeight },
+                fadeInDuration: 0.3
+            });
+        }, 100);
+    }
+
+    /**
+     * Log current animation status including multi-animations
+     */
+    logAnimationStatus() {
+        console.log('ANIMATION STATUS:');
+        
+        // Log single animation status
+        if (this.activeIdleAction) {
+            const action = this.activeIdleAction;
+            const clip = action._clip;
+            console.log(`   Idle: ${clip.name} - Running: ${action.isRunning()}, Weight: ${action.getEffectiveWeight().toFixed(2)}`);
+        }
+        
+        if (this.activeActionAnimation) {
+            const action = this.activeActionAnimation;
+            const clip = action._clip;
+            console.log(`   Action: ${clip.name} - Running: ${action.isRunning()}, Weight: ${action.getEffectiveWeight().toFixed(2)}`);
+        }
+        
+        // Log multi-animation status
+        if (Object.keys(this.activeActions).length > 0) {
+            console.log('MULTI-ANIMATION STATUS:');
+            Object.entries(this.activeActions).forEach(([name, action]) => {
+                console.log(`   ${name}: Running=${action.isRunning()}, Weight=${action.getEffectiveWeight().toFixed(2)}`);
+            });
+        }
     }
 
 }
