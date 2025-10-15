@@ -698,7 +698,13 @@ export class Renderer {
                 if (name.toLowerCase().includes('idle')) {
                     action.setEffectiveTimeScale(0.25); // Idle speed (30% slower)
                 } else {
-                    action.setEffectiveTimeScale(1.0); // Normal speed for actions
+                    action.setEffectiveTimeScale(0.4); // Action speed (60% slower)
+                }
+                
+                // Configure action animations with proper looping
+                if (!name.toLowerCase().includes('idle')) {
+                    action.setLoop(THREE.LoopRepeat, 3); // Max 3 loops for actions
+                    action.clampWhenFinished = true;
                 }
 
                 // Play the action
