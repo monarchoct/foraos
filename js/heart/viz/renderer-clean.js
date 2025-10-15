@@ -103,9 +103,9 @@ export class Renderer {
         console.log('Setting up Three.js scene...');
         this.scene = new THREE.Scene();
         
-        // Load cement background with 30% dark overlay
+        // Load neon12 background with 30% dark overlay
         const loader = new THREE.TextureLoader();
-        loader.load('./backgrounds/cement.jpg', (texture) => {
+        loader.load('./backgrounds/neon12.png', (texture) => {
             this.scene.background = texture;
             
             // Create a dark overlay to make background 30% darker
@@ -119,7 +119,7 @@ export class Renderer {
             darkOverlay.position.z = -5; // Behind character but in front of background
             this.scene.add(darkOverlay);
             
-            console.log('✅ Cement background loaded with 50% dark overlay');
+            console.log('✅ Neon12 background loaded with 50% dark overlay');
         });
     }
 
@@ -696,7 +696,7 @@ export class Renderer {
 
                 // Set animation speed based on type
                 if (name.toLowerCase().includes('idle')) {
-                    action.setEffectiveTimeScale(0.20); // Idle speed (50% slower)
+                    action.setEffectiveTimeScale(0.15); // Idle speed (65% slower)
                 } else {
                     action.setEffectiveTimeScale(0.2); // Action speed (80% slower)
                 }
