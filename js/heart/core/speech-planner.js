@@ -192,10 +192,10 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call directly (no proxy)
+            // Make OpenAI API call through Vite proxy
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            const response = await fetch('/api/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
