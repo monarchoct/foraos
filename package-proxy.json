@@ -1,0 +1,14 @@
+{
+  "name": "foraos-proxy",
+  "version": "1.0.0",
+  "description": "CORS proxy server for ForaOS OpenAI API calls",
+  "main": "simple-proxy.js",
+  "type": "module",
+  "scripts": {
+    "start": "node simple-proxy.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
