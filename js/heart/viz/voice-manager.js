@@ -105,14 +105,22 @@ export class VoiceManager {
             voiceSettings: requestBody.voice_settings
         });
         
-        const response = await fetch(`${apiKeys.elevenlabs.baseUrl}/text-to-speech/${voiceId}`, {
+        // Use backend TTS endpoint instead of direct ElevenLabs API
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const apiUrl = isLocal ? 'http://localhost:3001/api/tts' : 'https://foraos-production.up.railway.app/api/tts';
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': apiKeys.elevenlabs.apiKey
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                text: text,
+                voice_id: voiceId,
+                model_id: requestBody.model_id,
+                voice_settings: requestBody.voice_settings
+            })
         });
         
         if (!response.ok) {

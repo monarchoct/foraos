@@ -4,7 +4,7 @@
   "description": "ForaOS - Web AI Companion",
   "type": "module",
   "scripts": {
-    "start": "node railway-proxy.js",
+    "start": "node railway-backend.js",
     "dev": "node server.js",
     "build": "echo 'No build step needed for web app'"
   },
