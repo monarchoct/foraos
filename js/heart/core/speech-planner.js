@@ -196,16 +196,14 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use our own proxy server for reliable CORS handling
-            const apiUrl = 'https://fora-ayhoqwnje-leons-projects-40bf8a13.vercel.app/api/proxy/openai/v1/chat/completions';
+            const apiUrl = 'http://localhost:3001/api/chat';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: apiKeys.openai.model || 'gpt-3.5-turbo',
                     messages: messages,
                     max_tokens: apiKeys.openai.maxTokens || 150,
                     temperature: apiKeys.openai.temperature || 0.8
