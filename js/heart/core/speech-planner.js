@@ -148,14 +148,6 @@ Guidelines:
     async generateWithAI(prompt, input) {
         // Try to use OpenAI if available
         try {
-            const apiKeys = this.personality.configManager?.getApiKeys();
-            console.log('🔑 API Keys loaded:', apiKeys);
-            
-            if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
-                console.warn('OpenAI API key not configured, using fallback');
-                return this.generateFallbackResponse(input);
-            }
-            
             console.log('🤖 Generating AI response with OpenAI...');
             
             // Get conversation history for context
@@ -195,7 +187,9 @@ Guidelines:
             // Use Railway proxy server - no API key needed in frontend
             console.log('🔄 Sending request to Railway proxy...');
             
-            const apiUrl = 'https://foraos-production.up.railway.app/api/chat';
+            // Use local server for testing, Railway for production
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiUrl = isLocal ? 'http://localhost:3001/api/chat' : 'https://foraos-production.up.railway.app/api/chat';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -204,8 +198,8 @@ Guidelines:
                 },
                 body: JSON.stringify({
                     messages: messages,
-                    max_tokens: apiKeys.openai.maxTokens || 150,
-                    temperature: apiKeys.openai.temperature || 0.8
+                    max_tokens: 150,
+                    temperature: 0.8
                 })
             });
             
