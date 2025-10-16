@@ -1,9 +1,17 @@
 import http from 'http';
 import https from 'https';
 import { URL } from 'url';
+import fetch from 'node-fetch';
 
 // Use Railway's PORT environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
+
+// Load API key from environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+    console.error('❌ No OpenAI API key found in environment variables');
+}
 
 const server = http.createServer((req, res) => {
     // Enable CORS
@@ -18,73 +26,72 @@ const server = http.createServer((req, res) => {
         return;
     }
     
-    // Only handle OpenAI API requests
-    if (!req.url.startsWith('/api/openai/')) {
-        if (req.url === '/health') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: 'OK', message: 'ForaOS Proxy server is running', port: PORT }));
-            return;
-        }
-        res.writeHead(404);
-        res.end('Not found');
+    // Handle health check
+    if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'OK', message: 'ForaOS Proxy server is running', port: PORT }));
         return;
     }
     
-    console.log(`🔄 Proxying ${req.method} request to OpenAI API`);
+    // Handle chat API requests
+    if (req.url === '/api/chat') {
+        handleChatRequest(req, res);
+        return;
+    }
     
-    // Extract OpenAI path
-    const openaiPath = req.url.replace('/api/openai', '');
-    const openaiUrl = `https://api.openai.com${openaiPath}`;
+    res.writeHead(404);
+    res.end('Not found');
+});
+
+function handleChatRequest(req, res) {
+    if (req.method !== 'POST') {
+        res.writeHead(405);
+        res.end('Method not allowed');
+        return;
+    }
     
-    console.log(`📍 Target URL: ${openaiUrl}`);
+    console.log('🔄 Received chat request');
     
-    // Prepare headers
-    const headers = {
-        'Content-Type': req.headers['content-type'] || 'application/json',
-        'Authorization': req.headers['authorization']
-    };
+    let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
     
-    // Remove undefined headers
-    Object.keys(headers).forEach(key => {
-        if (headers[key] === undefined) {
-            delete headers[key];
+    req.on('end', async () => {
+        try {
+            const requestData = JSON.parse(body);
+            
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: requestData.messages,
+                    max_tokens: requestData.max_tokens || 150,
+                    temperature: requestData.temperature || 0.7,
+                }),
+            });
+
+            const data = await response.json();
+            console.log(`✅ Response status: ${response.status}`);
+            
+            res.writeHead(response.status, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+            
+        } catch (error) {
+            console.error("❌ Error:", error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
         }
     });
-    
-    console.log(`📤 Headers:`, headers);
-    
-    // Make request to OpenAI
-    const options = {
-        hostname: 'api.openai.com',
-        port: 443,
-        path: openaiPath,
-        method: req.method,
-        headers: headers
-    };
-    
-    const proxyReq = https.request(options, (proxyRes) => {
-        console.log(`📥 Response status: ${proxyRes.statusCode}`);
-        
-        // Set response headers
-        res.writeHead(proxyRes.statusCode, proxyRes.headers);
-        
-        // Pipe response data
-        proxyRes.pipe(res);
-    });
-    
-    proxyReq.on('error', (error) => {
-        console.error('❌ Proxy error:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Proxy server error', details: error.message }));
-    });
-    
-    // Pipe request data
-    req.pipe(proxyReq);
-});
+}
 
 server.listen(PORT, () => {
     console.log(`🚀 ForaOS Proxy server running on port ${PORT}`);
-    console.log(`🔗 OpenAI API proxy: /api/openai/v1/chat/completions`);
+    console.log(`🔗 OpenAI API proxy: /api/chat`);
     console.log(`💚 Health check: /health`);
 });
 
