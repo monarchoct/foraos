@@ -1,15 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "railway-proxy.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/proxy.js": {
+      "runtime": "nodejs18.x"
     }
-  ],
+  },
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "railway-proxy.js"
+      "src": "/api/proxy/(.*)",
+      "dest": "/api/proxy.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/proxy.js"
     }
   ]
 }
