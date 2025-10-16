@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 
 // Load API keys from environment variables or config file
-let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+let OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VENICE_API_KEY;
 let ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
 // Fallback to config file if environment variables are missing
@@ -31,8 +31,9 @@ if (!OPENAI_API_KEY || !ELEVENLABS_API_KEY) {
 console.log('🔍 Environment check:');
 console.log('  - NODE_ENV:', process.env.NODE_ENV);
 console.log('  - PORT:', process.env.PORT);
-console.log('  - OPENAI_API_KEY length:', OPENAI_API_KEY ? OPENAI_API_KEY.length : 'undefined');
-console.log('  - ELEVENLABS_API_KEY length:', ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.length : 'undefined');
+console.log('  - OPENAI_API_KEY length:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 'undefined');
+console.log('  - VENICE_API_KEY length:', process.env.VENICE_API_KEY ? process.env.VENICE_API_KEY.length : 'undefined');
+console.log('  - ELEVENLABS_API_KEY length:', process.env.ELEVENLABS_API_KEY ? process.env.ELEVENLABS_API_KEY.length : 'undefined');
 console.log('  - All env vars:', Object.keys(process.env).filter(key => key.includes('API')));
 
 console.log('🔑 OpenAI API Key:', OPENAI_API_KEY ? '✅ Set' : '❌ Missing');
