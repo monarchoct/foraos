@@ -9,9 +9,8 @@ app.use(cors());
 // Serve static files from the current directory
 app.use(express.static('.'));
 
-// Load API key from config
-import { readFileSync } from 'fs';
-const config = JSON.parse(readFileSync('./config/api-keys.json', 'utf8'));
+// Load API key from environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'your-api-key-here';
 
 app.post("/api/chat", async (req, res) => {
   try {
@@ -21,7 +20,7 @@ app.post("/api/chat", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${config.apiKey}`,
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
