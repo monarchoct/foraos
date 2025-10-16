@@ -192,10 +192,9 @@ Guidelines:
                 content: input
             });
             
-            // Make OpenAI API call - no backend approach
-            console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
+            // Use Railway proxy server - no API key needed in frontend
+            console.log('🔄 Sending request to Railway proxy...');
             
-            // Use our own proxy server for reliable CORS handling
             const apiUrl = 'https://foraos-production.up.railway.app/api/chat';
             
             const response = await fetch(apiUrl, {
