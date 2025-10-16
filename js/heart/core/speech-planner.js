@@ -148,6 +148,14 @@ Guidelines:
     async generateWithAI(prompt, input) {
         // Try to use OpenAI if available
         try {
+            const apiKeys = this.personality.configManager?.getApiKeys();
+            console.log('🔑 API Keys loaded:', apiKeys);
+            
+            if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
+                console.warn('OpenAI API key not configured, using fallback');
+                return this.generateFallbackResponse(input);
+            }
+            
             console.log('🤖 Generating AI response with OpenAI...');
             
             // Get conversation history for context
@@ -184,22 +192,23 @@ Guidelines:
                 content: input
             });
             
-            // Use Railway proxy server - no API key needed in frontend
-            console.log('🔄 Sending request to Railway proxy...');
+            // Make OpenAI API call - no backend approach
+            console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
-            // Use local server for testing, Railway for production
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const apiUrl = isLocal ? 'http://localhost:3000/api/chat' : 'https://foraos-production.up.railway.app/api/chat';
+            // Test direct OpenAI API call to check for CORS issues
+            const apiUrl = 'https://api.openai.com/v1/chat/completions';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKeys.openai.apiKey}`
                 },
                 body: JSON.stringify({
+                    model: apiKeys.openai.model || 'gpt-3.5-turbo',
                     messages: messages,
-                    max_tokens: 150,
-                    temperature: 0.8
+                    max_tokens: apiKeys.openai.maxTokens || 150,
+                    temperature: apiKeys.openai.temperature || 0.8
                 })
             });
             
@@ -208,13 +217,6 @@ Guidelines:
             }
             
             const data = await response.json();
-            console.log('📥 Full API response:', JSON.stringify(data, null, 2));
-            
-            // Check if we have choices and content
-            if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
-                throw new Error(`Invalid response structure: ${JSON.stringify(data)}`);
-            }
-            
             const aiResponse = data.choices[0]?.message?.content?.trim();
             
             if (aiResponse) {
