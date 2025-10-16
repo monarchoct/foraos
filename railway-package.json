@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node railway-proxy.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
