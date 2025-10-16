@@ -107,7 +107,7 @@ export class VoiceManager {
         
         // Use backend TTS endpoint instead of direct ElevenLabs API
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const apiUrl = isLocal ? 'http://localhost:3001/api/tts' : 'https://foraos-production.up.railway.app/api/tts';
+        const apiUrl = isLocal ? 'http://localhost:3000/api/tts' : 'https://foraos-production.up.railway.app/api/tts';
         
         const response = await fetch(apiUrl, {
             method: 'POST',

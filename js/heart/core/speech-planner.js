@@ -189,7 +189,7 @@ Guidelines:
             
             // Use local server for testing, Railway for production
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const apiUrl = isLocal ? 'http://localhost:3001/api/chat' : 'https://foraos-production.up.railway.app/api/chat';
+            const apiUrl = isLocal ? 'http://localhost:3000/api/chat' : 'https://foraos-production.up.railway.app/api/chat';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
