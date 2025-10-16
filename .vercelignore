@@ -1,0 +1,7 @@
+desktop-app/
+dist/
+node_modules/
+*.log
+.git/
+.github/
+electron-builder.json

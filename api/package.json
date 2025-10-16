@@ -1,0 +1,9 @@
+{
+  "name": "fora-proxy-api",
+  "version": "1.0.0",
+  "description": "ForaOS Proxy API for Vercel",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
