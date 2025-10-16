@@ -196,7 +196,7 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use our own proxy server for reliable CORS handling
-            const apiUrl = 'http://localhost:3001/api/openai/v1/chat/completions';
+            const apiUrl = 'https://fora-ayhoqwnje-leons-projects-40bf8a13.vercel.app/api/proxy/openai/v1/chat/completions';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
