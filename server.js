@@ -1,6 +1,8 @@
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -9,8 +11,23 @@ app.use(cors());
 // Serve static files from the current directory
 app.use(express.static('.'));
 
-// Load API key from environment variable
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Load API key from environment variable or config file
+let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+    try {
+        const configPath = path.join(process.cwd(), 'config', 'api-keys.json');
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        OPENAI_API_KEY = config.openai?.apiKey;
+        console.log('🔑 Loaded API key from config file');
+    } catch (error) {
+        console.error('❌ Failed to load API key from config:', error.message);
+    }
+}
+
+if (!OPENAI_API_KEY) {
+    console.error('❌ No OpenAI API key found in environment variables or config file');
+}
 
 app.post("/api/chat", async (req, res) => {
   try {
