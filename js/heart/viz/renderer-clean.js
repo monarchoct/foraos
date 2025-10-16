@@ -108,12 +108,12 @@ export class Renderer {
         loader.load('./backgrounds/neon12.png', (texture) => {
             this.scene.background = texture;
             
-            // Create a dark overlay to make background 30% darker
+            // Create a dark overlay to make background 20% darker
             const overlayGeometry = new THREE.PlaneGeometry(20, 20);
             const overlayMaterial = new THREE.MeshBasicMaterial({
                 color: 0x000000,
                 transparent: true,
-                opacity: 0.5  // 50% dark overlay
+                opacity: 0.2  // 20% dark overlay
             });
             const darkOverlay = new THREE.Mesh(overlayGeometry, overlayMaterial);
             darkOverlay.position.z = -5; // Behind character but in front of background
