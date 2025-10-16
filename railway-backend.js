@@ -1,14 +1,39 @@
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Load API keys from environment variables
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+// Load API keys from environment variables or config file
+let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+let ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+
+// Fallback to config file if environment variables are missing
+if (!OPENAI_API_KEY || !ELEVENLABS_API_KEY) {
+    try {
+        const configPath = path.join(process.cwd(), 'config', 'api-keys.json');
+        if (fs.existsSync(configPath)) {
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            OPENAI_API_KEY = OPENAI_API_KEY || config.openai?.apiKey;
+            ELEVENLABS_API_KEY = ELEVENLABS_API_KEY || config.elevenlabs?.apiKey;
+            console.log('📁 Loaded API keys from config file');
+        }
+    } catch (error) {
+        console.error('❌ Failed to load config file:', error.message);
+    }
+}
+
+// Debug environment variables
+console.log('🔍 Environment check:');
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - PORT:', process.env.PORT);
+console.log('  - OPENAI_API_KEY length:', OPENAI_API_KEY ? OPENAI_API_KEY.length : 'undefined');
+console.log('  - ELEVENLABS_API_KEY length:', ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.length : 'undefined');
+console.log('  - All env vars:', Object.keys(process.env).filter(key => key.includes('API')));
 
 console.log('🔑 OpenAI API Key:', OPENAI_API_KEY ? '✅ Set' : '❌ Missing');
 console.log('🔑 ElevenLabs API Key:', ELEVENLABS_API_KEY ? '✅ Set' : '❌ Missing');
