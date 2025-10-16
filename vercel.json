@@ -4,15 +4,5 @@
     "api/proxy.js": {
       "runtime": "nodejs18.x"
     }
-  },
-  "routes": [
-    {
-      "src": "/api/proxy/(.*)",
-      "dest": "/api/proxy.js"
-    },
-    {
-      "src": "/health",
-      "dest": "/api/proxy.js"
-    }
-  ]
+  }
 }

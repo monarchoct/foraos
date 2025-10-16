@@ -1,4 +1,6 @@
-export default function handler(req, res) {
+import fetch from 'node-fetch';
+
+export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -11,7 +13,7 @@ export default function handler(req, res) {
     }
     
     // Health check
-    if (req.url === '/api/proxy/health' || req.url === '/health') {
+    if (req.url === '/health' || req.url === '/api/proxy/health') {
         res.status(200).json({ 
             status: 'OK', 
             message: 'ForaOS Proxy server is running',
@@ -49,24 +51,22 @@ export default function handler(req, res) {
     
     console.log(`📤 Headers:`, headers);
     
-    // Make request to OpenAI
-    fetch(openaiUrl, {
-        method: req.method,
-        headers: headers,
-        body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined
-    })
-    .then(response => {
+    try {
+        // Make request to OpenAI
+        const response = await fetch(openaiUrl, {
+            method: req.method,
+            headers: headers,
+            body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined
+        });
+        
         console.log(`📥 Response status: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        res.status(200).json(data);
-    })
-    .catch(error => {
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
         console.error('❌ Proxy error:', error);
         res.status(500).json({ 
             error: 'Proxy server error', 
             details: error.message 
         });
-    });
+    }
 }
