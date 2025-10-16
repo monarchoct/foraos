@@ -27,14 +27,18 @@ if (!OPENAI_API_KEY || !ELEVENLABS_API_KEY) {
     }
 }
 
-// Debug environment variables
-console.log('🔍 Environment check:');
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - PORT:', process.env.PORT);
-console.log('  - OPENAI_API_KEY length:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 'undefined');
-console.log('  - VENICE_API_KEY length:', process.env.VENICE_API_KEY ? process.env.VENICE_API_KEY.length : 'undefined');
-console.log('  - ELEVENLABS_API_KEY length:', process.env.ELEVENLABS_API_KEY ? process.env.ELEVENLABS_API_KEY.length : 'undefined');
-console.log('  - All env vars:', Object.keys(process.env).filter(key => key.includes('API')));
+// Debug ALL environment variables
+console.log('🔍 ALL Environment Variables:');
+Object.keys(process.env).forEach(key => {
+    if (key.includes('API') || key.includes('KEY') || key.includes('SECRET')) {
+        console.log(`  ${key}: ${process.env[key] ? 'SET (' + process.env[key].length + ' chars)' : 'NOT SET'}`);
+    }
+});
+
+console.log('🔍 Railway-specific variables:');
+console.log('  - RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('  - RAILWAY_PROJECT_ID:', process.env.RAILWAY_PROJECT_ID);
+console.log('  - RAILWAY_SERVICE_ID:', process.env.RAILWAY_SERVICE_ID);
 
 console.log('🔑 OpenAI API Key:', OPENAI_API_KEY ? '✅ Set' : '❌ Missing');
 console.log('🔑 ElevenLabs API Key:', ELEVENLABS_API_KEY ? '✅ Set' : '❌ Missing');
