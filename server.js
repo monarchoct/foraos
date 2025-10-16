@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.static('.'));
 
 // Load API key from environment variable
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'your-api-key-here';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 app.post("/api/chat", async (req, res) => {
   try {
@@ -23,7 +23,7 @@ app.post("/api/chat", async (req, res) => {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5",
         messages: req.body.messages,
         max_tokens: req.body.max_tokens || 150,
         temperature: req.body.temperature || 0.7,
