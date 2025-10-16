@@ -215,6 +215,13 @@ Guidelines:
             }
             
             const data = await response.json();
+            console.log('📥 Full API response:', JSON.stringify(data, null, 2));
+            
+            // Check if we have choices and content
+            if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
+                throw new Error(`Invalid response structure: ${JSON.stringify(data)}`);
+            }
+            
             const aiResponse = data.choices[0]?.message?.content?.trim();
             
             if (aiResponse) {
