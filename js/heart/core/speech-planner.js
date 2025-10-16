@@ -196,7 +196,7 @@ Guidelines:
             console.log('🔑 Using API Key:', apiKeys.openai.apiKey.substring(0, 20) + '...');
             
             // Use our own proxy server for reliable CORS handling
-            const apiUrl = 'http://localhost:3001/api/chat';
+            const apiUrl = 'https://foraos-production.up.railway.app/api/chat';
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
