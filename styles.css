@@ -1022,7 +1022,7 @@ body::before {
     flex-direction: column;
     gap: 12px;
     padding: 20px;
-    background: rgba(60, 60, 60, 0.8);
+    background: rgba(30, 30, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 25px;
     backdrop-filter: blur(20px);
@@ -1035,6 +1035,7 @@ body::before {
     max-width: 700px;
     width: auto;
     margin: 20px auto;
+    top: 70%;
 }
 
 .settings-header {
@@ -1421,18 +1422,22 @@ body::before {
 /* Mobile responsive for settings */
 @media (max-width: 768px) {
     .settings-container {
-        max-height: 50px;
-        padding: 4px 8px;
+        height: 500px;
+        max-height: 500px;
+        padding: 8px 12px;
         margin: 0;
         border-radius: 8px;
         position: fixed !important;
-        bottom: 120px !important;
+        bottom: 160px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
-        width: 120px;
-        max-width: 120px;
-        min-width: 120px;
+        width: 280px;
+        max-width: 280px;
+        min-width: 280px;
         overflow: visible;
+        background: rgba(30, 30, 30, 0.9) !important;
+        border: 1px solid rgba(60, 60, 60, 0.8) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
     }
     
     .setting-item {
@@ -1447,16 +1452,20 @@ body::before {
     
     .settings-mode .settings-container {
         position: fixed !important;
-        bottom: 120px !important;
+        bottom: 160px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
-        max-height: 50px !important;
-        padding: 4px 8px !important;
+        height: 500px !important;
+        max-height: 500px !important;
+        padding: 8px 12px !important;
         margin: 0 !important;
-        width: 120px !important;
-        max-width: 120px !important;
-        min-width: 120px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+        min-width: 280px !important;
         overflow: visible !important;
+        background: rgba(30, 30, 30, 0.9) !important;
+        border: 1px solid rgba(60, 60, 60, 0.8) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
     }
     
     .setting-slider {
@@ -1983,10 +1992,10 @@ body::before {
 
 /* Settings Mode Styles - Same as China but white */
 .settings-mode .settings-container {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.7), rgba(10, 10, 10, 0.7));
-    border: none;
+    background: rgba(30, 30, 30, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 25px;
-    padding: 4px;
+    padding: 20px !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -2002,8 +2011,11 @@ body::before {
 .darkness-slider {
     width: 100%;
     height: 6px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     outline: none;
     -webkit-appearance: none;
     margin: 8px 0;
@@ -2038,24 +2050,23 @@ body::before {
 
 /* Remove glow from file inputs and style reset button */
 .setting-file {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(30, 30, 30, 0.9) !important;
+    border: 1px solid rgba(60, 60, 60, 0.8);
     border-radius: 8px;
     padding: 8px 12px;
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    /* Remove any glow effects */
-    box-shadow: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .setting-file:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(70, 70, 70, 0.9);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
 .reset-button {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 30, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     padding: 8px 12px;
@@ -2063,12 +2074,11 @@ body::before {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 14px;
-    /* Remove any glow effects */
-    box-shadow: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .reset-button:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(70, 70, 70, 0.9);
     border-color: rgba(255, 255, 255, 0.3);
 }
 

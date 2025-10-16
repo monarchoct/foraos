@@ -354,27 +354,23 @@ export class AnimationManager {
             }
         }
         
-        // Select mouth movement based on speech
-        if (lowerMessage.includes('open') || lowerMessage.includes('speak')) mouthMovement = 'A';
-        else if (lowerMessage.includes('close') || lowerMessage.includes('shut')) mouthMovement = 'O';
-        else if (lowerMessage.includes('pucker') || lowerMessage.includes('kiss')) mouthMovement = 'E';
-        else mouthMovement = this.aiSelectionArrays.mouthMovement[Math.floor(Math.random() * this.aiSelectionArrays.mouthMovement.length)]; // Random mouth movement
+        // Always use mouth speak 03 as primary, rarely mouth speak 04
+        const useRareMouth = Math.random() < 0.15; // 15% chance for mouth speak 04
+        mouthMovement = useRareMouth ? 'mouth speak 04' : 'mouth speak 03';
         
-        // Select emotion based on mood (only if strong emotion detected)
-        if (lowerMessage.includes('happy') || lowerMessage.includes('joy') || lowerMessage.includes('excited')) emotion = 'happy';
-        else if (lowerMessage.includes('sad') || lowerMessage.includes('sorrow') || lowerMessage.includes('cry')) emotion = 'sad';
+        // Select emotion based on mood (only if strong emotion detected) - use config emotion names
+        if (lowerMessage.includes('confused') || lowerMessage.includes('puzzled') || lowerMessage.includes('huh')) emotion = 'confused';
         else if (lowerMessage.includes('angry') || lowerMessage.includes('rage') || lowerMessage.includes('mad')) emotion = 'angry';
-        else if (lowerMessage.includes('surprised') || lowerMessage.includes('shock') || lowerMessage.includes('wow')) emotion = 'surprised';
-        else if (lowerMessage.includes('fear') || lowerMessage.includes('terror') || lowerMessage.includes('scared')) emotion = 'fear';
-        else if (lowerMessage.includes('disgust') || lowerMessage.includes('gross')) emotion = 'disgust';
+        else if (lowerMessage.includes('think') || lowerMessage.includes('pondering') || lowerMessage.includes('hmm')) emotion = 'thinking';
+        else if (lowerMessage.includes('sad') || lowerMessage.includes('sorrow') || lowerMessage.includes('cry')) emotion = 'sad';
         else if (lowerMessage.includes('fun') || lowerMessage.includes('excited')) emotion = 'really happy';
         else {
-            // Use config null chance (80% = 4 in 5 times)
-            const nullChance = this.animationConfig?.shapekeys?.emotions?.nullChance || 0.8;
+            // Use extremely high null chance (98% = 49 in 50 times) - emotions are very rare
+            const nullChance = 0.98;
             if (Math.random() < nullChance) {
-                emotion = null; // No emotion (4 in 5 times)
+                emotion = null; // No emotion (49 in 50 times)
             } else {
-                // Random emotion from available options
+                // Random emotion from available options (only 2% of the time)
                 emotion = this.aiSelectionArrays.emotions[Math.floor(Math.random() * this.aiSelectionArrays.emotions.length)];
             }
         }
@@ -521,12 +517,12 @@ export class AnimationManager {
         
         // Disable mouth movement when emotion is active (if configured)
         if (this.animationConfig?.shapekeys?.emotions?.disableMouthMovement && 
-            this.speechState.emotionCycle.isActive && this.speechState.currentEmotion) {
+            this.speechState.emotionFade?.isActive && this.speechState.currentEmotion) {
             
-            // Set mouth movement to 0 during emotion bursts
+            // Set mouth movement to 0 during emotion (on face_01001 mesh)
             if (this.character && this.speechState.currentMouthMovement) {
                 this.character.traverse((child) => {
-                    if (child.isMesh && child.morphTargetDictionary) {
+                    if (child.isMesh && child.name === 'face_01001' && child.morphTargetDictionary) {
                         if (child.morphTargetDictionary[this.speechState.currentMouthMovement] !== undefined) {
                             const index = child.morphTargetDictionary[this.speechState.currentMouthMovement];
                             child.morphTargetInfluences[index] = 0.0;
@@ -560,23 +556,32 @@ export class AnimationManager {
         // Scale to max 0.7 for more subtle mouth opening
         cycle.currentValue = Math.sin(cycleProgress * Math.PI) * 0.7;
 
-        // Apply the mouth movement value directly to the character
+        // Apply the mouth movement value to the correct mesh (face_01001)
         if (this.character && this.speechState.currentMouthMovement) {
             let foundShapekey = false;
             this.character.traverse((child) => {
-                if (child.isMesh && child.morphTargetDictionary) {
+                // Apply mouth speak shapekeys to face_01001 mesh
+                if (child.isMesh && child.name === 'face_01001' && child.morphTargetDictionary) {
                     if (child.morphTargetDictionary[this.speechState.currentMouthMovement] !== undefined) {
                         const index = child.morphTargetDictionary[this.speechState.currentMouthMovement];
                         child.morphTargetInfluences[index] = cycle.currentValue;
                         foundShapekey = true;
-                        
-
+                        console.log(`✅ Applied ${this.speechState.currentMouthMovement} to face_01001: ${cycle.currentValue}`);
+                    }
+                }
+                
+                // Always set mouth_02001 open shapekey to 1 during speech
+                if (child.isMesh && child.name === 'mouth_02001' && child.morphTargetDictionary) {
+                    if (child.morphTargetDictionary['mouth open'] !== undefined) {
+                        const index = child.morphTargetDictionary['mouth open'];
+                        child.morphTargetInfluences[index] = 1.0;
+                        console.log(`✅ Set mouth_02001 'mouth open' to 1.0`);
                     }
                 }
             });
             
             if (!foundShapekey) {
-                console.warn(`❌ Shapekey '${this.speechState.currentMouthMovement}' not found in model`);
+                console.warn(`❌ Mouth shapekey '${this.speechState.currentMouthMovement}' not found on face_01001 mesh`);
             }
         } else {
             console.warn('❌ No character or mouth movement available');
@@ -1009,20 +1014,38 @@ export class AnimationManager {
         
         this.speechState.isSpeaking = false;
         
-        // Fade out emotions if active
-        if (this.speechState.currentEmotion && this.speechState.emotionCycle.isActive) {
-            console.log(`😊 Fading out emotion: ${this.speechState.currentEmotion}`);
-            this.fadeOutEmotion(this.speechState.currentEmotion);
+        // Start emotion fade out if active
+        if (this.speechState.currentEmotion && this.speechState.emotionFade?.isActive) {
+            console.log(`😊 Starting emotion fade out: ${this.speechState.currentEmotion}`);
+            this.speechState.emotionFade.isFadingOut = true;
+            this.speechState.emotionFade.isFadingIn = false;
+            this.speechState.emotionFade.fadeTime = 0; // Reset fade timer
         }
         
-        // Stop mouth movements
+        // Stop mouth movements and reset mouth shapekeys
         if (this.speechState.mouthMovementCycle.isActive) {
             this.speechState.mouthMovementCycle.isActive = false;
             console.log(`👄 Stopping mouth movements`);
         }
         
-        // Stop action animations
-        if (this.speechState.currentAction && window.heartSystem?.renderer?.stopAnimations) {
+        // Reset mouth shapekeys to 0 when speech ends
+        this.resetMouthShapekeys();
+        
+        // Stop action animations with smooth fade out to prevent T-pose
+        if (this.speechState.currentAction && window.heartSystem?.renderer?.actions?.[this.speechState.currentAction]) {
+            const action = window.heartSystem.renderer.actions[this.speechState.currentAction];
+            
+            // Smooth fade out over 0.8 seconds to prevent T-pose clipping
+            action.fadeOut(0.8);
+            
+            // Stop the action after fade out completes
+            setTimeout(() => {
+                action.stop();
+                action.reset();
+                console.log(`🎬 Action animation faded out: ${this.speechState.currentAction}`);
+            }, 800);
+        } else if (window.heartSystem?.renderer?.stopAnimations) {
+            // Fallback to renderer's stop method
             window.heartSystem.renderer.stopAnimations();
             console.log(`🎬 Stopping action animation: ${this.speechState.currentAction}`);
         }
@@ -1039,9 +1062,133 @@ export class AnimationManager {
         // Apply emotion shapekeys with value 0 to fade out
         this.applyEmotionShapekeys(emotionName, 0.0);
         
-        // Deactivate emotion cycle
-        this.speechState.emotionCycle.isActive = false;
-        this.speechState.emotionCycle.currentValue = 0.0;
+        // Deactivate emotion fade
+        if (this.speechState.emotionFade) {
+            this.speechState.emotionFade.isActive = false;
+            this.speechState.emotionFade.currentValue = 0.0;
+        }
+    }
+    
+    resetMouthShapekeys() {
+        console.log(`👄 Resetting mouth shapekeys to 0`);
+        
+        if (!this.character) return;
+        
+        this.character.traverse((child) => {
+            // Reset mouth speak shapekeys on face_01001 mesh
+            if (child.isMesh && child.name === 'face_01001' && child.morphTargetDictionary) {
+                // Reset all mouth speak shapekeys to 0
+                Object.keys(child.morphTargetDictionary).forEach(shapekeyName => {
+                    if (shapekeyName.includes('speak') || shapekeyName.includes('mouth')) {
+                        const index = child.morphTargetDictionary[shapekeyName];
+                        if (index !== undefined && child.morphTargetInfluences) {
+                            child.morphTargetInfluences[index] = 0.0;
+                            console.log(`✅ Reset ${shapekeyName} to 0`);
+                        }
+                    }
+                });
+            }
+            
+            // Reset mouth open shapekey on mouth_02001 mesh
+            if (child.isMesh && child.name === 'mouth_02001' && child.morphTargetDictionary) {
+                if (child.morphTargetDictionary['mouth open'] !== undefined) {
+                    const index = child.morphTargetDictionary['mouth open'];
+                    child.morphTargetInfluences[index] = 0.0;
+                    console.log(`✅ Reset mouth_02001 'mouth open' to 0`);
+                }
+            }
+        });
+    }
+    
+    updateEmotionFade(deltaTime) {
+        if (!this.speechState.emotionFade?.isActive || !this.speechState.currentEmotion) {
+            return;
+        }
+        
+        const fade = this.speechState.emotionFade;
+        fade.fadeTime += deltaTime;
+        
+        if (fade.isFadingIn) {
+            // Fade in phase
+            const progress = Math.min(fade.fadeTime / fade.fadeInDuration, 1.0);
+            fade.currentValue = progress * fade.targetValue;
+            
+            if (progress >= 1.0) {
+                // Fade in complete, hold during speech
+                fade.isFadingIn = false;
+                fade.currentValue = fade.targetValue;
+                console.log(`😊 Emotion fade in complete: ${this.speechState.currentEmotion}`);
+            }
+        } else if (fade.isFadingOut) {
+            // Fade out phase
+            const progress = Math.min(fade.fadeTime / fade.fadeOutDuration, 1.0);
+            fade.currentValue = fade.targetValue * (1.0 - progress);
+            
+            if (progress >= 1.0) {
+                // Fade out complete
+                fade.isActive = false;
+                fade.currentValue = 0.0;
+                console.log(`😊 Emotion fade out complete: ${this.speechState.currentEmotion}`);
+            }
+        } else {
+            // Hold phase - maintain full value during speech, but check max duration
+            fade.currentValue = fade.targetValue;
+            
+            // If we've exceeded max duration, start fade out
+            if (fade.maxDuration && fade.fadeTime >= fade.maxDuration) {
+                fade.isFadingOut = true;
+                fade.isFadingIn = false;
+                fade.fadeTime = 0; // Reset fade timer for fade out
+                console.log(`😊 Emotion max duration reached, starting fade out: ${this.speechState.currentEmotion}`);
+            }
+        }
+        
+        // Apply the current emotion value
+        this.applyEmotionShapekeys(this.speechState.currentEmotion, fade.currentValue);
+    }
+    
+    applyEmotionShapekeys(emotionName, value) {
+        // Only log significant changes (0, 1, or every 0.2 change)
+        const shouldLog = value === 0 || value === 1 || Math.abs(value % 0.2) < 0.05;
+        if (shouldLog) {
+            console.log(`😊 Applying emotion shapekeys: ${emotionName} at value ${value.toFixed(2)}`);
+        }
+        
+        if (!this.animationConfig?.shapekeys?.emotions?.shapekeys?.[emotionName]) {
+            console.warn(`⚠️ Emotion '${emotionName}' not found in config`);
+            return;
+        }
+        
+        const emotionConfig = this.animationConfig.shapekeys.emotions.shapekeys[emotionName];
+        
+        // Apply each shapekey for this emotion
+        Object.keys(emotionConfig).forEach(shapekeyKey => {
+            const shapekeyConfig = emotionConfig[shapekeyKey];
+            const meshName = shapekeyConfig.mesh;
+            const shapekeyName = shapekeyConfig.shapekey;
+            const targetValue = value; // Use the provided value (1.0 for full, 0.0 for fade out)
+            
+            // Find the mesh and apply the shapekey
+            if (this.character) {
+                this.character.traverse((child) => {
+                    if (child.isMesh && child.name === meshName && child.morphTargetDictionary) {
+                        const shapekeyIndex = child.morphTargetDictionary[shapekeyName];
+                        if (shapekeyIndex !== undefined && child.morphTargetInfluences) {
+                            child.morphTargetInfluences[shapekeyIndex] = targetValue;
+                            if (shouldLog) {
+                                console.log(`✅ Applied ${shapekeyName} to ${meshName}: ${targetValue.toFixed(2)}`);
+                            }
+                        } else {
+                            console.warn(`⚠️ Shapekey '${shapekeyName}' not found on mesh '${meshName}'`);
+                        }
+                    }
+                });
+            }
+        });
+        
+        if (shouldLog) {
+            console.log(`😊 Emotion '${emotionName}' applied at value ${value.toFixed(2)}`);
+        }
     }
 
     processAISelections(aiSelections) {
@@ -1075,14 +1222,20 @@ export class AnimationManager {
                     action.setEffectiveWeight(0); // Start at 0 weight
                     action.enabled = true;
                     
-                    // Smooth fade in to prevent T-pose clipping
-                    action.fadeIn(0.8); // 0.8 second fade in
+                    // Smooth fade in to prevent T-pose clipping - longer fade for smoother transition
+                    action.fadeIn(1.2); // 1.2 second fade in for smoother transition
                     action.play();
                     
-                    // Gradually increase weight to target after fade-in
+                    // Gradually increase weight to target with multiple steps to prevent T-pose
                     setTimeout(() => {
-                        action.setEffectiveWeight(0.7); // Reach target weight
-                    }, 200); // Small delay after fade-in starts
+                        action.setEffectiveWeight(0.3); // First step
+                    }, 100);
+                    setTimeout(() => {
+                        action.setEffectiveWeight(0.5); // Second step
+                    }, 300);
+                    setTimeout(() => {
+                        action.setEffectiveWeight(0.7); // Final target weight
+                    }, 600);
                     
                     console.log(`✅ Speech action configured: ${actionName} (3 loops max, 40% speed, smooth transition)`);
                 } else {
@@ -1119,19 +1272,25 @@ export class AnimationManager {
             console.log(`🎭 No action selected for this speech`);
         }
         
-        // Handle emotions (can be null) - ENABLED
+        // Handle emotions (can be null) - ENABLED with smooth fade in/out
         if (aiSelections.emotions && aiSelections.emotions !== 'null' && aiSelections.emotions !== null) {
             this.speechState.currentEmotion = aiSelections.emotions;
             console.log(`😊 Processing emotion: ${aiSelections.emotions}`);
             
-            // Apply emotion shapekeys immediately
-            this.applyEmotionShapekeys(aiSelections.emotions, 1.0); // Set to full value (1.0)
+            // Start emotion fade in with max 2 second total duration
+            this.speechState.emotionFade = {
+                isActive: true,
+                isFadingIn: true,
+                isFadingOut: false,
+                fadeTime: 0,
+                fadeInDuration: 0.4, // 0.4 second fade in
+                fadeOutDuration: 0.6, // 0.6 second fade out
+                targetValue: 1.0,
+                currentValue: 0.0,
+                maxDuration: 2.0 // Maximum 2 seconds total
+            };
             
-            // Hold emotion during speech (don't fade out immediately)
-            this.speechState.emotionCycle.isActive = true;
-            this.speechState.emotionCycle.cycleTime = 0;
-            this.speechState.emotionCycle.currentValue = 1.0; // Start at full intensity
-            console.log(`😊 Emotion applied and held: ${aiSelections.emotions} at full intensity`);
+            console.log(`😊 Emotion starting fade in: ${aiSelections.emotions} (1s fade in, will hold during speech)`);
         } else {
             console.log(`😐 No emotion selected`);
         }
@@ -1213,8 +1372,13 @@ export class AnimationManager {
             } else {
                 // Update mouth movement cycling during speech
                 this.updateMouthMovementCycling(deltaTime);
-                // Update emotion cycling during speech (EXACTLY like mouth movement)
-                this.updateEmotionCycling(deltaTime);
+                // Update emotion fade during speech
+                this.updateEmotionFade(deltaTime);
+            }
+        } else {
+            // Speech has ended, but continue updating emotion fade if it's still active
+            if (this.speechState.emotionFade?.isActive) {
+                this.updateEmotionFade(deltaTime);
             }
         }
     }
