@@ -1,0 +1,18 @@
+{
+  "name": "foraos-backend",
+  "version": "1.0.0",
+  "description": "ForaOS Backend API",
+  "main": "railway-backend.js",
+  "type": "module",
+  "scripts": {
+    "start": "node railway-backend.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
