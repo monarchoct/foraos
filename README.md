@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🤖✨ ForaOS ✨🤖
+# 🤖✨ mimicOS ✨🤖
 
 ### *Create Your Perfect AI Companion*
 
@@ -11,7 +11,7 @@
 
 ---
 
-**🌟 A fully customizable AI companion with 3D character animations, emotions, and voice interaction**  
+**🌟 A fully customizable Opensource AI companion Launchpad with 3D character animations, emotions, and voice interaction**  
 **🎨 Deploy your own AI companion with your own model, animations, and personality**
 
 ---
@@ -469,6 +469,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
+<<<<<<< HEAD
 ## 🌟 **Show Your Support**
 
 If you love ForaOS, please give us a ⭐ **star** on GitHub!
@@ -485,3 +486,6 @@ If you love ForaOS, please give us a ⭐ **star** on GitHub!
 </div>
 
 </div>
+=======
+**Happy building! Create your favorite AI character! **
+>>>>>>> 75a94736233b5b60a20905486a7be612b93d6ba9
