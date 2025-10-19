@@ -1,41 +1,102 @@
-# ForaOS - AI Companion with 3D Character
+<div align="center">
 
-A fully customizable AI companion with 3D character animations, emotions, and voice interaction. Deploy your own AI companion with your own model, animations, and personality.
+# 🤖✨ ForaOS ✨🤖
 
-## 🚀 Features
+### *Create Your Perfect AI Companion*
 
-### 🧠 Core AI Logic
-- **3D Character Animations**: Idle animations, action gestures, and emotion expressions
-- **AI Chat Generation**: Powered by OpenAI with customizable personality traits
-- **Voice Synthesis**: ElevenLabs integration for realistic speech
-- **Emotion System**: Dynamic facial expressions with shapekeys
-- **Background Customization**: Multiple background options with darkness controls
-- **Responsive Design**: Works on desktop and mobile devices
-- **Modular Configuration**: Easy to customize animations, emotions, and personality
+[![GitHub stars](https://img.shields.io/github/stars/monarchoct/ForaOS?style=social)](https://github.com/monarchoct/ForaOS)
+[![GitHub forks](https://img.shields.io/github/forks/monarchoct/ForaOS?style=social)](https://github.com/monarchoct/ForaOS)
+[![GitHub issues](https://img.shields.io/github/issues/monarchoct/ForaOS)](https://github.com/monarchoct/ForaOS/issues)
+[![GitHub license](https://img.shields.io/github/license/monarchoct/ForaOS)](https://github.com/monarchoct/ForaOS/blob/main/LICENSE)
 
-### 🎨 Advanced Features
-- **Emotion Engine**: Analyzes user input and manages emotional states
-- **Personality System**: Customizable traits affecting behavior and responses
-- **Thought Manager**: Generates autonomous thoughts and internal dialogue
-- **Affinity Manager**: Tracks relationship development with the user
-- **Speech Planner**: Generates contextual, personality-based responses
-- **Memory Manager**: Stores conversation history and emotional states
-- **Autonomous Loop**: Makes the AI act independently without user input
-- **Social Integration**: Twitter posting for autonomous thoughts
+---
 
-### 🔌 Input/Output
-- **Chat Interface**: Text-based conversation
-- **Voice Input**: Speech recognition for hands-free interaction
-- **Screenshot Capture**: Save moments with the AI companion
-- **Background Manager**: Dynamic, mood-based environment changes
-- **Voice Manager**: Text-to-speech with ElevenLabs integration
+**🌟 A fully customizable AI companion with 3D character animations, emotions, and voice interaction**  
+**🎨 Deploy your own AI companion with your own model, animations, and personality**
+
+---
+
+</div>
+
+## ✨ What Makes ForaOS Special?
+
+<table>
+<tr>
+<td width="50%">
+
+### 🧠 **Intelligent AI Core**
+- **Advanced Emotion Engine** - Real emotional responses
+- **Personality System** - Fully customizable traits
+- **Memory Management** - Remembers your conversations
+- **Autonomous Thinking** - AI acts independently
+- **Context Awareness** - Understands what you're doing
+
+</td>
+<td width="50%">
+
+### 🎨 **Stunning 3D Visualization**
+- **Lifelike Animations** - Smooth idle and action movements
+- **Dynamic Emotions** - Facial expressions change with mood
+- **Voice Synthesis** - Natural speech with ElevenLabs
+- **Custom Backgrounds** - Beautiful environments
+- **Responsive Design** - Works on any device
+
+</td>
+</tr>
+</table>
+
+## 🚀 Key Features
+
+<div align="center">
+
+| 🎭 **Character System** | 🤖 **AI Intelligence** | 🎨 **Visual Experience** |
+|:---:|:---:|:---:|
+| 3D Model Support | OpenAI Integration | Dynamic Animations |
+| Emotion Expressions | Personality Traits | Background Customization |
+| Voice Synthesis | Memory Management | Mobile Responsive |
+| Action Gestures | Autonomous Behavior | Screen Capture |
+
+</div>
+
+## 🎯 Quick Start
+
+<div align="center">
+
+```bash
+# 1️⃣ Clone the repository
+git clone https://github.com/monarchoct/ForaOS.git
+cd ForaOS
+
+# 2️⃣ Copy environment template
+cp .env.example .env
+
+# 3️⃣ Add your API keys to .env
+# Edit .env file with your OpenAI and ElevenLabs keys
+
+# 4️⃣ Start development server
+npm install
+npm run web-dev
+
+# 5️⃣ Open in browser
+# Navigate to http://localhost:5173
+```
+
+**🚀 Your AI companion will be ready in minutes!**
+
+</div>
 
 ## 📋 Prerequisites
 
-- A 3D character model in GLB format
-- OpenAI API key
-- ElevenLabs API key (optional)
-- Web hosting (GitHub Pages, Vercel, Netlify, etc.)
+<div align="center">
+
+| Requirement | Description | Optional |
+|:---:|:---|:---:|
+| 🤖 **3D Model** | GLB format character model | ❌ |
+| 🔑 **OpenAI API** | For AI chat generation | ❌ |
+| 🎤 **ElevenLabs** | For voice synthesis | ✅ |
+| 🌐 **Web Hosting** | GitHub Pages, Vercel, etc. | ✅ |
+
+</div>
 
 ## 🛠️ Setup Instructions
 
@@ -396,10 +457,31 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support
 
-If you need help setting up your companion:
+<div align="center">
 
-Just join our Discord Server!
+## 💬 **Need Help?**
+
+| Platform | Link | Description |
+|:---:|:---|:---|
+| 🐛 **Issues** | [GitHub Issues](https://github.com/monarchoct/ForaOS/issues) | Report bugs and request features |
+| 💬 **Discord** | [Join Discord](https://discord.gg/your-discord) | Get help from the community |
+| 📖 **Wiki** | [Documentation](https://github.com/monarchoct/ForaOS/wiki) | Detailed guides and tutorials |
 
 ---
 
-**Happy building! Create your favorite AI character! **
+## 🌟 **Show Your Support**
+
+If you love ForaOS, please give us a ⭐ **star** on GitHub!
+
+<div align="center">
+
+### 🎨 **Create Your Perfect AI Companion** ✨
+
+**Happy building! Create your favorite AI character!** 🤖✨
+
+[![Star on GitHub](https://img.shields.io/github/stars/monarchoct/ForaOS?style=for-the-badge&logo=github)](https://github.com/monarchoct/ForaOS)
+[![Fork on GitHub](https://img.shields.io/github/forks/monarchoct/ForaOS?style=for-the-badge&logo=github)](https://github.com/monarchoct/ForaOS)
+
+</div>
+
+</div>
