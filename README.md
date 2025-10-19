@@ -1,6 +1,6 @@
-# ForaOS - AI Companion with 3D Character
+# mimicOS - AI Companions with 3D Characters
 
-A fully customizable AI companion with 3D character animations, emotions, and voice interaction. Deploy your own AI companion with your own model, animations, and personality.
+A fully customizable Opensource AI companion Launchpad with 3D character animations, emotions, and voice interaction. Deploy your own AI companion with your own model, animations, and personality.
 
 ## 🚀 Features
 
