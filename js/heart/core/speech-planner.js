@@ -149,7 +149,7 @@ Guidelines:
         // Try to use OpenAI if available
         try {
             const apiKeys = this.personality.configManager?.getApiKeys();
-            console.log('🔑 API Keys loaded (keys hidden for security)');
+            console.log('🔑 API Keys loaded successfully');
             
             if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
                 console.warn('OpenAI API key not configured, using fallback');
@@ -193,7 +193,7 @@ Guidelines:
             });
             
             // Make OpenAI API call - no backend approach
-            console.log('🔑 Using OpenAI API Key (hidden for security)');
+            console.log('🔑 Using OpenAI API');
             
             // Test direct OpenAI API call to check for CORS issues
             const apiUrl = 'https://api.openai.com/v1/chat/completions';

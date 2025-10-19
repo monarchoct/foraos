@@ -1,4 +1,82 @@
 {
+  "model": {
+    "description": "3D Character model configuration",
+    "characterFile": "./models/fora11.glb",
+    "backgroundFile": "./backgrounds/neon12.png",
+    "defaultBackground": "neon12.png"
+  },
+  "camera": {
+    "description": "Camera positioning and movement controls",
+    "position": {
+      "x": 0,
+      "y": 1.6,
+      "z": 3.5
+    },
+    "rotation": {
+      "x": -0.1,
+      "y": 0,
+      "z": 0
+    },
+    "zoom": {
+      "min": 2.0,
+      "max": 6.0,
+      "default": 3.5,
+      "step": 0.1
+    },
+    "tilt": {
+      "min": -0.5,
+      "max": 0.3,
+      "default": -0.1,
+      "step": 0.05
+    },
+    "height": {
+      "min": 1.0,
+      "max": 3.0,
+      "default": 1.6,
+      "step": 0.1
+    },
+    "autoRotate": {
+      "enabled": false,
+      "speed": 0.5
+    },
+    "controls": {
+      "enableZoom": true,
+      "enablePan": true,
+      "enableRotate": true
+    }
+  },
+  "character": {
+    "description": "Character size and positioning controls",
+    "scale": {
+      "x": 1.0,
+      "y": 1.0,
+      "z": 1.0,
+      "min": 0.5,
+      "max": 2.0,
+      "step": 0.1
+    },
+    "position": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "height": {
+      "default": 1.0,
+      "min": 0.5,
+      "max": 2.0,
+      "step": 0.1
+    },
+    "offset": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    }
+  },
   "animations": {
     "idle": {
       "description": "Multiple idle animations that rotate randomly",
@@ -70,6 +148,12 @@
     },
       "emotions": {
         "description": "Emotion shapekeys for AI mood selection - each emotion uses 4 shapekeys for consistent expression",
+        "enabled": true,
+        "fadeInDuration": 1.0,
+        "fadeOutDuration": 1.0,
+        "nullChance": 0.4,
+        "holdDuringSpeech": true,
+        "disableMouthMovement": false,
         "shapekeys": {
           "confused": {
             "shapekey1": {
@@ -159,12 +243,7 @@
               "value": 1.0
             }
           }
-        },
-        "fadeInDuration": 1.0,
-        "fadeOutDuration": 1.0,
-        "nullChance": 0.4,
-        "holdDuringSpeech": true,
-        "disableMouthMovement": false
+        }
       }
   },
       "aiSelection": {

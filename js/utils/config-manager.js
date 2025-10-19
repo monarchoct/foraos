@@ -7,23 +7,76 @@ export class ConfigManager {
             'heart-state': 'config/heart-state.json',
             'memory': 'config/memory.json'
         };
+        this.envApiKeys = null;
+        this.loadEnvApiKeys();
+    }
+
+    loadEnvApiKeys() {
+        // Check if we're in a browser environment
+        if (typeof window !== 'undefined') {
+            // In browser, we can't access process.env directly
+            // We'll rely on the server to provide env vars or use config files
+            return;
+        }
+        
+        // In Node.js environment, load from process.env
+        try {
+            this.envApiKeys = {
+                openai: {
+                    apiKey: process.env.OPENAI_API_KEY || '',
+                    model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+                    maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 150,
+                    temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.8
+                },
+                venice: {
+                    apiKey: process.env.VENICE_API_KEY || '',
+                    baseUrl: process.env.VENICE_BASE_URL || 'https://api.venice.ai/api/v1',
+                    model: process.env.VENICE_MODEL || 'claude-3-5-sonnet',
+                    maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 150,
+                    temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.8,
+                    characterSlug: process.env.VENICE_CHARACTER_SLUG || ''
+                },
+                elevenlabs: {
+                    apiKey: process.env.ELEVENLABS_API_KEY || '',
+                    baseUrl: process.env.ELEVENLABS_BASE_URL || 'https://api.elevenlabs.io/v1'
+                },
+                twitter: {
+                    apiKey: process.env.TWITTER_API_KEY || '',
+                    apiSecret: process.env.TWITTER_API_SECRET || '',
+                    accessToken: process.env.TWITTER_ACCESS_TOKEN || '',
+                    accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET || '',
+                    bearerToken: process.env.TWITTER_BEARER_TOKEN || ''
+                },
+                twitch: {
+                    clientId: process.env.TWITCH_CLIENT_ID || '',
+                    clientSecret: process.env.TWITCH_CLIENT_SECRET || '',
+                    accessToken: process.env.TWITCH_ACCESS_TOKEN || ''
+                }
+            };
+            console.log('Environment API keys loaded');
+        } catch (error) {
+            console.error('Failed to load environment API keys:', error);
+        }
     }
 
     async loadConfigs() {
-        console.log('Loading configurations...');
         
         try {
             const promises = Object.entries(this.configPaths).map(async ([key, path]) => {
+                // Skip api-keys file loading to avoid JSON errors
+                if (key === 'api-keys') {
+                    this.configs[key] = this.getDefaultConfig(path);
+                    return;
+                }
+                
                 const config = await this.loadConfig(path);
                 this.configs[key] = config;
-                console.log(`✅ Loaded ${key} configuration`);
             });
             
             await Promise.all(promises);
-            console.log('✅ All configurations loaded successfully!');
             
         } catch (error) {
-            console.error('❌ Error loading configurations:', error);
+            console.error('Error loading configurations:', error);
             throw error;
         }
     }
@@ -33,7 +86,7 @@ export class ConfigManager {
             const response = await fetch(path);
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.warn(`⚠️ Config file not found: ${path} - using defaults`);
+                    console.warn(`Config file not found: ${path} - using defaults`);
                     return this.getDefaultConfig(path);
                 }
                 throw new Error(`Failed to load config: ${response.statusText}`);
@@ -46,16 +99,16 @@ export class ConfigManager {
                     service.apiKey && service.apiKey.trim() !== ''
                 );
                 if (!hasKeys) {
-                    console.warn('⚠️ API keys file found but all keys are empty. Add your API keys to GitHub Secrets for full functionality.');
+                    console.warn('API keys file found but all keys are empty');
                 } else {
-                    console.log('✅ API keys loaded successfully');
+                    console.log('API keys loaded successfully');
                 }
             }
             
             return config;
         } catch (error) {
-            console.error(`❌ Error loading config from ${path}:`, error);
-            console.warn(`⚠️ Using default config for ${path}`);
+            console.error(`Error loading config from ${path}:`, error);
+            console.warn(`Using default config for ${path}`);
             return this.getDefaultConfig(path);
         }
     }
@@ -86,7 +139,22 @@ export class ConfigManager {
     }
 
     getApiKeys() {
+        // Prioritize environment variables over config file
+        if (this.envApiKeys && this.hasEnvApiKeys()) {
+            return this.envApiKeys;
+        }
         return this.configs['api-keys'];
+    }
+
+    hasEnvApiKeys() {
+        if (!this.envApiKeys) return false;
+        
+        // Check if any environment API keys are set
+        return Object.values(this.envApiKeys).some(service => 
+            service.apiKey && service.apiKey.trim() !== '' && 
+            !service.apiKey.includes('your-') && 
+            !service.apiKey.includes('here')
+        );
     }
 
     getHeartState() {
@@ -97,10 +165,10 @@ export class ConfigManager {
     async updateConfig(configName, newConfig) {
         try {
             this.configs[configName] = newConfig;
-            console.log(`✅ Updated ${configName} configuration`);
+            console.log(`Updated ${configName} configuration`);
             return true;
         } catch (error) {
-            console.error(`❌ Error updating ${configName} configuration:`, error);
+            console.error(`Error updating ${configName} configuration:`, error);
             return false;
         }
     }
@@ -111,7 +179,7 @@ export class ConfigManager {
             // For now, we'll use localStorage as a fallback since we can't write to files from browser
             const storageKey = `heart-config-${configName}`;
             localStorage.setItem(storageKey, JSON.stringify(configData, null, 2));
-            console.log(`💾 Saved ${configName} to localStorage (${storageKey})`);
+            console.log(`Saved ${configName} to localStorage`);
             return true;
         } catch (error) {
             console.error(`❌ Error saving ${configName} to file:`, error);

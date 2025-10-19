@@ -105,7 +105,7 @@ export class AnimationManager {
     }
 
     async initialize(character, animationMixer) {
-        console.log('Initializing Animation Manager...');
+        // Initializing Animation Manager
         
         // Set core components
         this.character = character;
@@ -124,7 +124,7 @@ export class AnimationManager {
         // Setup from JSON configuration
         this.setupFromConfig();
         
-        console.log('Animation Manager initialized!');
+        // Animation Manager initialized
         this.logInitializationSummary();
         
         // Setup global test functions
@@ -194,14 +194,6 @@ export class AnimationManager {
         }
         
             this.availableAnimations = this.animationMixer._actions.map(action => action._clip.name);
-        console.log('Available animations:', this.availableAnimations);
-            console.log('Total animations found:', this.availableAnimations.length);
-            
-        // Show you what animations are available
-            this.animationMixer._actions.forEach((action, index) => {
-                const clip = action._clip;
-                console.log(`Animation ${index + 1}: "${clip.name}" (Duration: ${clip.duration.toFixed(2)}s)`);
-        });
     }
 
     readAvailableShapekeys() {
@@ -220,11 +212,10 @@ export class AnimationManager {
                     const shapekeyNames = Object.keys(child.morphTargetDictionary);
                     totalShapekeys += shapekeyNames.length;
                     
-                    console.log('Found shapekeys for mesh:', child.name);
-                    console.log('Shapekey names:', shapekeyNames);
+                // Found shapekeys for mesh
             }
         });
-        console.log('📊 Total shapekeys found:', totalShapekeys);
+        // Shapekeys loaded
     }
 
 
@@ -1506,11 +1497,7 @@ export class AnimationManager {
 
     // Debug and logging methods
     logInitializationSummary() {
-        console.log('📊 Animation Manager Summary:');
-        console.log('🎬 Available animations:', this.availableAnimations);
-        console.log('📋 Animation mappings:', this.animationMapping);
-        console.log('🎭 Available shapekeys:', this.availableShapekeys);
-        console.log('🤖 AI selection arrays:', this.aiSelectionArrays);
+        // Animation Manager ready
     }
 
     printConfiguration() {

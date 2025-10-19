@@ -1,11 +1,19 @@
-<<<<<<< HEAD
-# HEART AI Companion System
+# ForaOS - AI Companion with 3D Character
 
-A sophisticated AI companion system with emotional intelligence, personality-driven responses, and lifelike 3D visualization using Three.js.
+A fully customizable AI companion with 3D character animations, emotions, and voice interaction. Deploy your own AI companion with your own model, animations, and personality.
 
-## 🌟 Features
+## 🚀 Features
 
 ### 🧠 Core AI Logic
+- **3D Character Animations**: Idle animations, action gestures, and emotion expressions
+- **AI Chat Generation**: Powered by OpenAI with customizable personality traits
+- **Voice Synthesis**: ElevenLabs integration for realistic speech
+- **Emotion System**: Dynamic facial expressions with shapekeys
+- **Background Customization**: Multiple background options with darkness controls
+- **Responsive Design**: Works on desktop and mobile devices
+- **Modular Configuration**: Easy to customize animations, emotions, and personality
+
+### 🎨 Advanced Features
 - **Emotion Engine**: Analyzes user input and manages emotional states
 - **Personality System**: Customizable traits affecting behavior and responses
 - **Thought Manager**: Generates autonomous thoughts and internal dialogue
@@ -13,65 +21,205 @@ A sophisticated AI companion system with emotional intelligence, personality-dri
 - **Speech Planner**: Generates contextual, personality-based responses
 - **Memory Manager**: Stores conversation history and emotional states
 - **Autonomous Loop**: Makes the AI act independently without user input
-
-### 🎨 Visualization
-- **Three.js Renderer**: 3D character rendering with cel-shading
-- **Animation Manager**: Smooth character animations and transitions
-- **Blendshape Manager**: Facial expressions and emotion visualization
-- **Micro Movement Manager**: Subtle movements like blinking and breathing
-- **Background Manager**: Dynamic, mood-based environment changes
-- **Voice Manager**: Text-to-speech with ElevenLabs integration
+- **Social Integration**: Twitter posting for autonomous thoughts
 
 ### 🔌 Input/Output
 - **Chat Interface**: Text-based conversation
 - **Voice Input**: Speech recognition for hands-free interaction
-- **Social Integration**: Twitter posting for autonomous thoughts
 - **Screenshot Capture**: Save moments with the AI companion
+- **Background Manager**: Dynamic, mood-based environment changes
+- **Voice Manager**: Text-to-speech with ElevenLabs integration
 
-## 🚀 Quick Start
+## 📋 Prerequisites
 
-### 1. Install Dependencies
+- A 3D character model in GLB format
+- OpenAI API key
+- ElevenLabs API key (optional)
+- Web hosting (GitHub Pages, Vercel, Netlify, etc.)
+
+## 🛠️ Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/ForaOS.git
+cd ForaOS
+```
+
+### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 2. Configure API Keys
-Edit `config/api-keys.json` and add your API keys:
+### 3. Configure API Keys
+
+Create a `.env` file in the root directory:
+
+```env
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_MAX_TOKENS=150
+OPENAI_TEMPERATURE=0.8
+
+# Optional
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+ELEVENLABS_BASE_URL=https://api.elevenlabs.io/v1
+
+# Venice AI (Alternative to OpenAI)
+VENICE_API_KEY=your_venice_token_here
+VENICE_BASE_URL=https://api.venice.ai/api/v1
+VENICE_MODEL=claude-3-5-sonnet
+VENICE_CHARACTER_SLUG=your_character_slug
+
+# Twitter API
+TWITTER_API_KEY=your_twitter_api_key
+TWITTER_API_SECRET=your_twitter_api_secret
+TWITTER_ACCESS_TOKEN=your_twitter_access_token
+TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+TWITTER_BEARER_TOKEN=your_twitter_bearer_token
+
+# Twitch API
+TWITCH_CLIENT_ID=your_twitch_client_id
+TWITCH_CLIENT_SECRET=your_twitch_client_secret
+TWITCH_ACCESS_TOKEN=your_twitch_access_token
+```
+
+### 4. Configure Your Character
+
+#### Add Your 3D Model
+1. Place your character GLB file in the `models/` folder
+2. Update `config/animation-config.json` to configure your model and background:
 ```json
 {
-  "openai": {
-    "apiKey": "your-openai-api-key-here"
-  },
-  "elevenlabs": {
-    "apiKey": "your-elevenlabs-api-key-here"
+  "model": {
+    "description": "3D Character model configuration",
+    "characterFile": "./models/your-character.glb",
+    "backgroundFile": "./backgrounds/your-background.png",
+    "defaultBackground": "your-background.png"
   }
 }
 ```
 
-### 3. Customize Personality
-Edit `config/personality.json` to modify the AI's personality:
+#### Configure Animations
+Edit `config/animation-config.json` to match your character's animations:
+
 ```json
 {
-  "name": "Airi",
+  "animations": {
+    "idle": {
+      "animations": [
+        "Your Idle Animation 1",
+        "Your Idle Animation 2",
+        "Your Idle Animation 3"
+      ],
+      "timeScale": 0.25
+    },
+    "actions": {
+      "animations": [
+        "Wave",
+        "Nod",
+        "Shake Head",
+        "Thumbs Up"
+      ],
+      "maxLoops": 3,
+      "timeScale": 0.2
+    }
+  }
+}
+```
+
+#### Configure Shapekeys (Emotions)
+Map your character's shapekeys for emotions in `config/animation-config.json`:
+
+```json
+{
+  "shapekeys": {
+    "emotions": {
+      "shapekeys": {
+        "happy": {
+          "shapekey1": {
+            "mesh": "face_01001",
+            "shapekey": "mouth smile",
+            "value": 1.0
+          },
+          "shapekey2": {
+            "mesh": "brows_01001",
+            "shapekey": "eyebrow up",
+            "value": 1.0
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 5. Customize Personality
+
+Edit `config/personality.json` to define your AI's personality:
+
+```json
+{
+  "name": "Your AI Name",
   "baseTraits": {
-    "optimism": 0.8,
+    "friendliness": 0.8,
+    "humor": 0.6,
     "empathy": 0.9,
-    "playfulness": 0.8
-  }
+    "curiosity": 0.7
+  },
+  "customTraits": {
+    "sarcasm": 0.3,
+    "creativity": 0.8
+  },
+  "backgroundStory": "Your AI's backstory and personality description"
 }
 ```
 
-### 4. Start Development Server
+### 6. Start Development Server
+
 ```bash
-npm run dev
+npm run web-dev
 ```
 
-### 5. Open in Browser
+### 7. Open in Browser
 Navigate to `http://localhost:5173`
 
-## 🎛️ Configuration
+## 🎨 Customization Options
 
-### Personality Traits
+### Backgrounds
+- Add background images to `backgrounds/` folder
+- Set your preferred background with `backgroundFile` and `defaultBackground` in `config/animation-config.json`
+
+### UI Theme
+Customize colors and styling in `companion-config.json`:
+
+```json
+{
+  "ui": {
+    "theme": {
+      "loadingScreen": {
+        "backgroundColor": "#39FF14",
+        "textColor": "#ffffff"
+      },
+      "settings": {
+        "containerBackground": "rgba(30, 30, 30, 0.9)",
+        "buttonBackground": "rgba(30, 30, 30, 0.9)"
+      }
+    }
+  }
+}
+```
+
+### Animation Settings
+- Adjust idle animation speed with `timeScale`
+- Configure action animation loops and fade durations
+- Set emotion fade in/out timing
+
+## 🎛️ Personality Configuration
+
+### Base Traits
 - **optimism**: How positive the AI is (0-1)
 - **empathy**: Emotional sensitivity (0-1)
 - **playfulness**: Fun-loving nature (0-1)
@@ -94,6 +242,20 @@ Each emotion has:
 - **stability**: Voice consistency (0-1)
 - **similarityBoost**: Voice similarity (0-1)
 - **style**: Voice style (0-1)
+
+## 🚀 Deployment
+
+### GitHub Pages (Recommended)
+
+1. Push your code to a GitHub repository
+2. Go to Settings → Pages
+3. Select "Deploy from a branch" → "main"
+4. Your site will be available at `https://yourusername.github.io/repository-name`
+
+### Netlify
+
+1. Drag and drop your project folder to Netlify
+2. Or connect your GitHub repository for automatic deployments
 
 ## 🏗️ Architecture
 
@@ -136,147 +298,89 @@ config-manager.js     - Configuration loading
 3. Watch the character's expressions and animations change
 4. Use the control buttons for additional features
 
-### Control Buttons
-- **📹 Video**: Toggle video features
-- **🔊 Speaker**: Toggle audio output
-- **🎤 Mic**: Toggle voice input
-- **⚙️ Settings**: Open configuration menu
+## 🔧 Troubleshooting
 
-### Menu Options
-- **Personality**: View and edit AI traits
-- **Current Mood**: See emotional state
-- **Recent Thoughts**: View autonomous thoughts
-- **Settings**: Configure APIs and preferences
+### Common Issues
 
-## 🔧 Customization
+**Character not loading:**
+- Check that your GLB file is in the correct path
+- Verify the file name matches `companion-config.json`
+- Ensure the GLB file is not corrupted
 
-### Adding New Emotions
-Edit `config/personality.json`:
-```json
-{
-  "emotions": {
-    "newEmotion": {
-      "intensity": 0.7,
-      "blendshape": "new_expression",
-      "voiceModifier": { "pitch": 1.1, "speed": 1.0 },
-      "animation": "idle_new_emotion"
-    }
-  }
-}
+**Animations not working:**
+- Verify animation names match exactly (case-sensitive)
+- Check that animations exist in your GLB file
+- Review browser console for errors
+
+**API errors:**
+- Verify your API keys are correct in the `.env` file
+- Check that you have sufficient API credits
+- Ensure CORS is properly configured for your domain
+
+**Shapekeys not working:**
+- Verify mesh names match your model
+- Check shapekey names are correct
+- Ensure shapekeys exist in your model
+
+### Debug Mode
+
+Enable debug logging by opening browser console (F12) to see detailed information about:
+- Animation loading
+- API calls
+- Error messages
+- Configuration loading
+
+## 📁 Project Structure
+
 ```
-
-### Modifying Personality
-Adjust trait values in `config/personality.json`:
-```json
-{
-  "baseTraits": {
-    "optimism": 0.9,    // Very optimistic
-    "shyness": 0.1,     // Very outgoing
-    "playfulness": 0.8  // Quite playful
-  }
-}
+ForaOS/
+├── config/
+│   ├── companion-config.json    # Main configuration
+│   ├── personality.json         # AI personality traits
+│   ├── heart-state.json         # Runtime state
+│   ├── memory.json              # Conversation memory
+│   └── api-keys-template.json   # API keys template
+├── models/                      # 3D character models
+├── backgrounds/                 # Background images
+├── icons/                       # UI icons
+├── js/
+│   ├── heart/                   # Core AI system
+│   │   ├── core/               # AI logic components
+│   │   ├── viz/                # Visualization components
+│   │   ├── social/             # Social media integration
+│   │   └── inputs/             # Input handling
+│   ├── ui/                      # User interface
+│   └── utils/                   # Utility functions
+├── styles.css                   # Main stylesheet
+├── index.html                   # Main HTML file
+├── .env                         # Environment variables (create this)
+└── env.example                  # Environment variables template
 ```
-
-### Custom Voice
-Get a voice ID from ElevenLabs and update:
-```json
-{
-  "voiceSettings": {
-    "voiceId": "your-voice-id-here"
-  }
-}
-```
-
-## 🎨 3D Character
-
-### Loading Custom Models
-1. Place your GLB file in the `models/` directory
-2. Update the renderer to load your model
-3. Ensure your model has blendshapes for emotions
-
-### Blendshape Names
-- `happy` - Joyful expression
-- `sad` - Sad expression
-- `excited` - Excited expression
-- `calm` - Peaceful expression
-- `surprised` - Surprised expression
-- `angry` - Angry expression
 
 ## 🔌 API Integration
 
-### OpenAI (Optional)
+### OpenAI (Required)
 - Used for advanced response generation
-- Falls back to built-in responses if not configured
+- Configure in `.env` file with `OPENAI_API_KEY`
 
 ### ElevenLabs (Optional)
 - Provides high-quality text-to-speech
 - Falls back to browser TTS if not configured
 
+### Venice AI (Alternative)
+- Alternative to OpenAI
+- Configure with `VENICE_API_KEY`
+
 ### Twitter (Optional)
 - Posts autonomous thoughts publicly
 - Requires Twitter API credentials
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Character not loading?**
-- Check browser console for errors
-- Ensure Three.js is properly loaded
-- Verify model file path
-
-**Voice not working?**
-- Check ElevenLabs API key
-- Ensure microphone permissions
-- Try browser TTS fallback
-
-**Responses not generating?**
-- Check OpenAI API key
-- Verify network connection
-- Check browser console for errors
-
-### Debug Mode
-Open browser console to see detailed logs:
-```
-🚀 Initializing HEART AI Companion System...
-🧠 Initializing HEART Core System...
-🎨 Initializing Visualization Components...
-✅ HEART System initialized successfully!
-```
-
-## 📝 Development
-
-### Project Structure
-```
-├── index.html              # Main HTML file
-├── styles.css              # CSS styles
-├── js/
-│   ├── main.js            # Application entry point
-│   ├── heart/
-│   │   ├── heart.js       # Main HEART system
-│   │   ├── core/          # AI logic components
-│   │   ├── viz/           # Visualization components
-│   │   └── inputs/        # Input handling
-│   └── utils/             # Utility functions
-├── config/
-│   ├── personality.json   # AI personality
-│   ├── api-keys.json      # API configurations
-│   └── heart-state.json   # Current state
-└── models/                # 3D character models
-```
-
-### Adding New Features
-1. Create new component in appropriate directory
-2. Add initialization to main HEART system
-3. Update configuration files as needed
-4. Test thoroughly before deployment
-
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
 
 ## 📄 License
@@ -286,14 +390,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - Three.js for 3D rendering
+- OpenAI for AI chat capabilities
 - ElevenLabs for voice synthesis
-- OpenAI for language processing
-- The AI companion community for inspiration
+- The open-source community
+
+## 📞 Support
+
+If you need help setting up your companion:
+
+Just join our Discord Server!
 
 ---
 
-**Made with ❤️ for creating meaningful AI companions** 
-=======
-# ForaOS
-Four.Meme Mascot Ai Companion
->>>>>>> 84900d54d7b6dfd86ecac6b455421b5ad8823333
+**Happy building! Create your favorite AI character! **
