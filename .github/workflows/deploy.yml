@@ -27,14 +27,8 @@ jobs:
       - name: Create API Keys Config with Secrets
         run: |
           mkdir -p config
-          echo "=== DEBUGGING SECRETS ==="
-          echo "OPENAI_API_KEY exists: ${{ secrets.OPENAI_API_KEY != '' }}"
-          echo "ELEVENLABS_API_KEY exists: ${{ secrets.ELEVENLABS_API_KEY != '' }}"
-          echo "OPENAI_API_KEY length: ${#OPENAI_API_KEY}"
-          echo "ELEVENLABS_API_KEY length: ${#ELEVENLABS_API_KEY}"
-          echo "OPENAI_API_KEY first 5 chars: ${OPENAI_API_KEY:0:5}"
-          echo "ELEVENLABS_API_KEY first 5 chars: ${ELEVENLABS_API_KEY:0:5}"
-          echo "=== CREATING API KEYS FILE ==="
+          echo "=== CREATING API KEYS FILE WITH CACHE BUST ==="
+          echo "Timestamp: $(date)"
           cat > config/api-keys.json << EOF
           {
             "openai": {
@@ -61,10 +55,9 @@ jobs:
             }
           }
           EOF
-          echo "=== FILE CREATED ==="
-          echo "File contents:"
-          cat config/api-keys.json
-          echo "=== END DEBUG ==="
+          echo "=== API KEYS FILE CREATED SUCCESSFULLY ==="
+          echo "File size: $(wc -c < config/api-keys.json) bytes"
+          echo "=== DEPLOYMENT READY ==="
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
