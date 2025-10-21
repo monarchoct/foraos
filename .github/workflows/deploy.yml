@@ -30,36 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Create API Keys Config
-        run: |
-          mkdir -p config
-          cat > config/api-keys.json << EOF
-          {
-            "openai": {
-              "apiKey": "${{ secrets.OPENAI_API_KEY || '' }}",
-              "model": "gpt-3.5-turbo",
-              "maxTokens": 150,
-              "temperature": 0.8
-            },
-            "elevenlabs": {
-              "apiKey": "${{ secrets.ELEVENLABS_API_KEY || '' }}",
-              "baseUrl": "https://api.elevenlabs.io/v1"
-            },
-            "twitter": {
-              "apiKey": "${{ secrets.TWITTER_API_KEY || '' }}",
-              "apiSecret": "${{ secrets.TWITTER_API_SECRET || '' }}",
-              "accessToken": "${{ secrets.TWITTER_ACCESS_TOKEN || '' }}",
-              "accessTokenSecret": "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET || '' }}",
-              "bearerToken": "${{ secrets.TWITTER_BEARER_TOKEN || '' }}"
-            },
-            "twitch": {
-              "clientId": "${{ secrets.TWITCH_CLIENT_ID || '' }}",
-              "clientSecret": "${{ secrets.TWITCH_CLIENT_SECRET || '' }}",
-              "accessToken": "${{ secrets.TWITCH_ACCESS_TOKEN || '' }}"
-            }
-          }
-          EOF
-      
       - name: Build
         run: npm run web-build
         
