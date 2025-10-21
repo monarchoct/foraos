@@ -40,6 +40,8 @@ jobs:
           cp -r backgrounds dist/
           cp -r icons dist/
           echo "Config files copied to dist"
+          echo "Checking API keys content:"
+          head -5 dist/config/api-keys.json
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
