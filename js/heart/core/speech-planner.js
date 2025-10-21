@@ -143,18 +143,29 @@ Guidelines:
     }
 
     getApiKey() {
-        // Try multiple sources for API key
-        const browserKeys = getBrowserApiKeys();
-        const apiKey = browserKeys.openai?.apiKey || 
-                      this.personality?.configManager?.getApiKeys?.()?.openai?.apiKey ||
-                      (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY);
+        // Get API key directly from localStorage
+        let apiKey = null;
+        
+        try {
+            const storedKeys = localStorage.getItem('foraos_api_keys');
+            if (storedKeys) {
+                const keys = JSON.parse(storedKeys);
+                apiKey = keys.openai?.apiKey;
+            }
+        } catch (e) {
+            console.warn('Failed to parse stored API keys:', e);
+        }
+        
+        // Fallback to window object
+        if (!apiKey && window.API_KEYS?.openai?.apiKey) {
+            apiKey = window.API_KEYS.openai.apiKey;
+        }
         
         console.log('🔑 OpenAI API Key Debug:', {
-            fromBrowser: !!browserKeys.openai?.apiKey,
-            fromConfig: !!this.personality?.configManager?.getApiKeys?.()?.openai?.apiKey,
-            fromEnv: !!(typeof process !== 'undefined' && process.env?.OPENAI_API_KEY),
+            fromLocalStorage: !!localStorage.getItem('foraos_api_keys'),
+            fromWindow: !!window.API_KEYS?.openai?.apiKey,
             keyLength: apiKey ? apiKey.length : 0,
-            localStorage: localStorage.getItem('foraos_api_keys') ? 'exists' : 'missing'
+            keyPreview: apiKey ? apiKey.substring(0, 10) + '...' : 'none'
         });
         
         return apiKey;

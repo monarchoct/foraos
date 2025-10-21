@@ -70,22 +70,32 @@ export class VoiceManager {
     }
 
     async generateSpeech(text, modifiers) {
-        // HARDCODED API KEY - FUCK GITHUB SECRETS
-        // Get API key from multiple sources
-        const browserKeys = getBrowserApiKeys();
-        const ELEVENLABS_API_KEY = browserKeys.elevenlabs?.apiKey || 
-                                   this.configManager?.getApiKeys?.()?.elevenlabs?.apiKey ||
-                                   'your-elevenlabs-api-key-here';
+        // Get API key directly from localStorage
+        let ELEVENLABS_API_KEY = null;
+        
+        try {
+            const storedKeys = localStorage.getItem('foraos_api_keys');
+            if (storedKeys) {
+                const keys = JSON.parse(storedKeys);
+                ELEVENLABS_API_KEY = keys.elevenlabs?.apiKey;
+            }
+        } catch (e) {
+            console.warn('Failed to parse stored API keys:', e);
+        }
+        
+        // Fallback to window object
+        if (!ELEVENLABS_API_KEY && window.API_KEYS?.elevenlabs?.apiKey) {
+            ELEVENLABS_API_KEY = window.API_KEYS.elevenlabs.apiKey;
+        }
         
         console.log('🔑 ElevenLabs API Key Debug:', {
-            fromBrowser: !!browserKeys.elevenlabs?.apiKey,
-            fromConfig: !!this.configManager?.getApiKeys?.()?.elevenlabs?.apiKey,
-            keyLength: ELEVENLABS_API_KEY.length,
-            keyPreview: ELEVENLABS_API_KEY.substring(0, 10) + '...',
-            localStorage: localStorage.getItem('foraos_api_keys') ? 'exists' : 'missing'
+            fromLocalStorage: !!localStorage.getItem('foraos_api_keys'),
+            fromWindow: !!window.API_KEYS?.elevenlabs?.apiKey,
+            keyLength: ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.length : 0,
+            keyPreview: ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.substring(0, 10) + '...' : 'none'
         });
         
-        if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'your-elevenlabs-api-key-here') {
+        if (!ELEVENLABS_API_KEY) {
             console.error('❌ ElevenLabs API key not found! Please configure it via api-config.html');
             throw new Error('ElevenLabs API key not configured. Please open api-config.html to set your API key.');
         }

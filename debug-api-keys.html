@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .debug { background: #2a2a2a; padding: 20px; margin: 10px 0; border-radius: 5px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #555; border-radius: 5px; background: #333; color: #fff; }
+    </style>
+</head>
+<body>
+    <h1>🔑 API Key Debug Tool</h1>
+    
+    <div class="debug">
+        <h3>Current API Keys Status:</h3>
+        <div id="status"></div>
+    </div>
+    
+    <div class="debug">
+        <h3>Set API Keys:</h3>
+        <input type="text" id="openaiKey" placeholder="OpenAI API Key" />
+        <input type="text" id="elevenlabsKey" placeholder="ElevenLabs API Key" />
+        <button onclick="setKeys()">Set Keys</button>
+        <button onclick="clearKeys()">Clear Keys</button>
+        <button onclick="testRetrieval()">Test Retrieval</button>
+    </div>
+    
+    <div class="debug">
+        <h3>Debug Info:</h3>
+        <div id="debug"></div>
+    </div>
+
+    <script type="module">
+        import { getBrowserApiKeys } from './js/config/env-config.js';
+        
+        function updateStatus() {
+            const keys = getBrowserApiKeys();
+            const statusDiv = document.getElementById('status');
+            
+            statusDiv.innerHTML = `
+                <p><strong>OpenAI Key:</strong> ${keys.openai?.apiKey ? '✅ Set (' + keys.openai.apiKey.substring(0, 10) + '...)' : '❌ Not set'}</p>
+                <p><strong>ElevenLabs Key:</strong> ${keys.elevenlabs?.apiKey ? '✅ Set (' + keys.elevenlabs.apiKey.substring(0, 10) + '...)' : '❌ Not set'}</p>
+                <p><strong>localStorage:</strong> ${localStorage.getItem('foraos_api_keys') ? '✅ Exists' : '❌ Missing'}</p>
+                <p><strong>window.API_KEYS:</strong> ${window.API_KEYS ? '✅ Exists' : '❌ Missing'}</p>
+            `;
+        }
+        
+        function setKeys() {
+            const keys = {
+                openai: { apiKey: document.getElementById('openaiKey').value.trim() },
+                elevenlabs: { apiKey: document.getElementById('elevenlabsKey').value.trim() }
+            };
+            
+            localStorage.setItem('foraos_api_keys', JSON.stringify(keys));
+            window.API_KEYS = keys;
+            
+            updateStatus();
+            alert('Keys set!');
+        }
+        
+        function clearKeys() {
+            localStorage.removeItem('foraos_api_keys');
+            window.API_KEYS = null;
+            document.getElementById('openaiKey').value = '';
+            document.getElementById('elevenlabsKey').value = '';
+            updateStatus();
+            alert('Keys cleared!');
+        }
+        
+        function testRetrieval() {
+            const keys = getBrowserApiKeys();
+            const debugDiv = document.getElementById('debug');
+            
+            debugDiv.innerHTML = `
+                <pre>${JSON.stringify(keys, null, 2)}</pre>
+                <p><strong>localStorage raw:</strong> ${localStorage.getItem('foraos_api_keys')}</p>
+                <p><strong>window.API_KEYS:</strong> ${JSON.stringify(window.API_KEYS)}</p>
+            `;
+        }
+        
+        // Load existing keys
+        const existingKeys = JSON.parse(localStorage.getItem('foraos_api_keys') || '{}');
+        if (existingKeys.openai?.apiKey) {
+            document.getElementById('openaiKey').value = existingKeys.openai.apiKey;
+        }
+        if (existingKeys.elevenlabs?.apiKey) {
+            document.getElementById('elevenlabsKey').value = existingKeys.elevenlabs.apiKey;
+        }
+        
+        // Make functions global
+        window.setKeys = setKeys;
+        window.clearKeys = clearKeys;
+        window.testRetrieval = testRetrieval;
+        
+        updateStatus();
+    </script>
+</body>
+</html>
