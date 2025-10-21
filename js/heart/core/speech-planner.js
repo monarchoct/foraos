@@ -1,3 +1,5 @@
+import { getBrowserApiKeys } from '../../config/env-config.js';
+
 export class SpeechPlanner {
     constructor(personality, heartState) {
         this.personality = personality;
@@ -142,20 +144,20 @@ Guidelines:
 
     getApiKey() {
         // Try multiple sources for API key
-        if (typeof window !== 'undefined' && window.OPENAI_API_KEY) {
-            return window.OPENAI_API_KEY;
-        }
+        const browserKeys = getBrowserApiKeys();
+        const apiKey = browserKeys.openai?.apiKey || 
+                      this.personality?.configManager?.getApiKeys?.()?.openai?.apiKey ||
+                      (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY);
         
-        if (this.personality?.configManager?.getApiKeys?.()?.openai?.apiKey) {
-            return this.personality.configManager.getApiKeys().openai.apiKey;
-        }
+        console.log('🔑 OpenAI API Key Debug:', {
+            fromBrowser: !!browserKeys.openai?.apiKey,
+            fromConfig: !!this.personality?.configManager?.getApiKeys?.()?.openai?.apiKey,
+            fromEnv: !!(typeof process !== 'undefined' && process.env?.OPENAI_API_KEY),
+            keyLength: apiKey ? apiKey.length : 0,
+            localStorage: localStorage.getItem('foraos_api_keys') ? 'exists' : 'missing'
+        });
         
-        // Check for environment variable (Node.js)
-        if (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY) {
-            return process.env.OPENAI_API_KEY;
-        }
-        
-        return null;
+        return apiKey;
     }
 
     async makeApiRequest(messages, apiKey) {

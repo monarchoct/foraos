@@ -1,3 +1,5 @@
+import { getBrowserApiKeys } from '../../config/env-config.js';
+
 export class VoiceManager {
     constructor(configManager) {
         this.configManager = configManager;
@@ -69,7 +71,24 @@ export class VoiceManager {
 
     async generateSpeech(text, modifiers) {
         // HARDCODED API KEY - FUCK GITHUB SECRETS
-        const ELEVENLABS_API_KEY = "sk_499bce360d9e3f6ff4ea48b1b65d06cd3f7fecacde76bc6d";
+        // Get API key from multiple sources
+        const browserKeys = getBrowserApiKeys();
+        const ELEVENLABS_API_KEY = browserKeys.elevenlabs?.apiKey || 
+                                   this.configManager?.getApiKeys?.()?.elevenlabs?.apiKey ||
+                                   'your-elevenlabs-api-key-here';
+        
+        console.log('🔑 ElevenLabs API Key Debug:', {
+            fromBrowser: !!browserKeys.elevenlabs?.apiKey,
+            fromConfig: !!this.configManager?.getApiKeys?.()?.elevenlabs?.apiKey,
+            keyLength: ELEVENLABS_API_KEY.length,
+            keyPreview: ELEVENLABS_API_KEY.substring(0, 10) + '...',
+            localStorage: localStorage.getItem('foraos_api_keys') ? 'exists' : 'missing'
+        });
+        
+        if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'your-elevenlabs-api-key-here') {
+            console.error('❌ ElevenLabs API key not found! Please configure it via api-config.html');
+            throw new Error('ElevenLabs API key not configured. Please open api-config.html to set your API key.');
+        }
         
         // Detect if text contains Chinese characters
         const hasChinese = /[\u4e00-\u9fff]/.test(text);

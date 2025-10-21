@@ -15,8 +15,8 @@ app.use(cors({
 // Parse JSON bodies
 app.use(express.json());
 
-// Proxy endpoint for OpenAI API
-app.all('/api/openai/*', async (req, res) => {
+// Proxy endpoint for OpenAI API - catch all routes starting with /api/openai/
+app.use('/api/openai', async (req, res) => {
     try {
         console.log(`🔄 Proxying ${req.method} request to OpenAI API`);
         
