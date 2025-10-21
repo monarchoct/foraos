@@ -30,45 +30,38 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Create API keys config
+      - name: Create API Keys Config
         run: |
           mkdir -p config
-          echo "Creating API keys config..."
-          echo "OpenAI key length: ${#OPENAI_API_KEY}"
-          echo "ElevenLabs key length: ${#ELEVENLABS_API_KEY}"
           cat > config/api-keys.json << EOF
           {
             "openai": {
-              "apiKey": "${{ secrets.OPENAI_API_KEY || 'your-openai-api-key-here' }}",
+              "apiKey": "${{ secrets.OPENAI_API_KEY || '' }}",
               "model": "gpt-3.5-turbo",
               "maxTokens": 150,
               "temperature": 0.8
             },
             "elevenlabs": {
-              "apiKey": "${{ secrets.ELEVENLABS_API_KEY || 'your-elevenlabs-api-key-here' }}",
+              "apiKey": "${{ secrets.ELEVENLABS_API_KEY || '' }}",
               "baseUrl": "https://api.elevenlabs.io/v1"
             },
             "twitter": {
-              "apiKey": "${{ secrets.TWITTER_API_KEY || 'your-twitter-api-key' }}",
-              "apiSecret": "${{ secrets.TWITTER_API_SECRET || 'your-twitter-api-secret' }}",
-              "accessToken": "${{ secrets.TWITTER_ACCESS_TOKEN || 'your-twitter-access-token' }}",
-              "accessTokenSecret": "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET || 'your-twitter-access-token-secret' }}",
-              "bearerToken": "${{ secrets.TWITTER_BEARER_TOKEN || 'your-twitter-bearer-token' }}"
+              "apiKey": "${{ secrets.TWITTER_API_KEY || '' }}",
+              "apiSecret": "${{ secrets.TWITTER_API_SECRET || '' }}",
+              "accessToken": "${{ secrets.TWITTER_ACCESS_TOKEN || '' }}",
+              "accessTokenSecret": "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET || '' }}",
+              "bearerToken": "${{ secrets.TWITTER_BEARER_TOKEN || '' }}"
             },
             "twitch": {
-              "clientId": "${{ secrets.TWITCH_CLIENT_ID || 'your-twitch-client-id' }}",
-              "clientSecret": "${{ secrets.TWITCH_CLIENT_SECRET || 'your-twitch-client-secret' }}",
-              "accessToken": "${{ secrets.TWITCH_ACCESS_TOKEN || 'your-twitch-access-token' }}"
+              "clientId": "${{ secrets.TWITCH_CLIENT_ID || '' }}",
+              "clientSecret": "${{ secrets.TWITCH_CLIENT_SECRET || '' }}",
+              "accessToken": "${{ secrets.TWITCH_ACCESS_TOKEN || '' }}"
             }
           }
           EOF
-          echo "API keys config created successfully"
-        
+      
       - name: Build
         run: npm run web-build
-        
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
         
       - name: Copy config files to dist
         run: |
@@ -77,6 +70,9 @@ jobs:
           cp -r backgrounds dist/
           cp -r icons dist/
           echo "Config files copied to dist"
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
