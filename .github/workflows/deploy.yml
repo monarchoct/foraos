@@ -70,6 +70,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
+      - name: Copy config files to dist
+        run: |
+          cp -r config dist/
+          cp -r models dist/
+          cp -r backgrounds dist/
+          cp -r icons dist/
+          echo "Config files copied to dist"
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
