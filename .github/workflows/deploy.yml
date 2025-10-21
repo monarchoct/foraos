@@ -16,10 +16,10 @@ concurrency:
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,6 +27,9 @@ jobs:
       - name: Create API Keys Config with Secrets
         run: |
           mkdir -p config
+          echo "Checking if secrets are available:"
+          echo "OPENAI_API_KEY length: ${#OPENAI_API_KEY}"
+          echo "ELEVENLABS_API_KEY length: ${#ELEVENLABS_API_KEY}"
           cat > config/api-keys.json << EOF
           {
             "openai": {
