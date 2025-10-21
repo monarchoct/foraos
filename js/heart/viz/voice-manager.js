@@ -68,11 +68,8 @@ export class VoiceManager {
     }
 
     async generateSpeech(text, modifiers) {
-        const apiKeys = this.configManager.getApiKeys();
-        
-        if (!apiKeys.elevenlabs || apiKeys.elevenlabs.apiKey === 'your-elevenlabs-api-key-here') {
-            throw new Error('ElevenLabs API key not configured');
-        }
+        // HARDCODED API KEY - FUCK GITHUB SECRETS
+        const ELEVENLABS_API_KEY = "sk_499bce360d9e3f6ff4ea48b1b65d06cd3f7fecacde76bc6d";
         
         // Detect if text contains Chinese characters
         const hasChinese = /[\u4e00-\u9fff]/.test(text);
@@ -105,12 +102,12 @@ export class VoiceManager {
             voiceSettings: requestBody.voice_settings
         });
         
-        const response = await fetch(`${apiKeys.elevenlabs.baseUrl}/text-to-speech/${voiceId}`, {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
             method: 'POST',
             headers: {
                 'Accept': 'audio/mpeg',
                 'Content-Type': 'application/json',
-                'xi-api-key': apiKeys.elevenlabs.apiKey
+                'xi-api-key': ELEVENLABS_API_KEY
             },
             body: JSON.stringify(requestBody)
         });
