@@ -1,6 +1,6 @@
 <div align="center">
 
-![mimicOS Banner](banner1)
+![mimicOS Banner](./banner1.png)
 
 # 🤖✨ mimicOS ✨🤖
 
