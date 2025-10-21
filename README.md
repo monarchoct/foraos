@@ -1,5 +1,7 @@
 <div align="center">
 
+![mimicOS Banner](banner1)
+
 # 🤖✨ mimicOS ✨🤖
 
 ### *Create Your Perfect AI Companion*
