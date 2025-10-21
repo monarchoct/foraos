@@ -14,15 +14,7 @@ export class ConfigManager {
         
         try {
             const promises = Object.entries(this.configPaths).map(async ([key, path]) => {
-                let config;
-                
-                // Special handling for API keys - try Vite env vars first
-                if (key === 'api-keys') {
-                    config = this.loadApiKeysFromViteEnv() || await this.loadConfig(path);
-                } else {
-                    config = await this.loadConfig(path);
-                }
-                
+                const config = await this.loadConfig(path);
                 this.configs[key] = config;
                 console.log(`✅ Loaded ${key} configuration`);
             });
@@ -34,38 +26,6 @@ export class ConfigManager {
             console.error('❌ Error loading configurations:', error);
             throw error;
         }
-    }
-
-    loadApiKeysFromViteEnv() {
-        // Check for Vite environment variables (available at build time)
-        if (import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_ELEVENLABS_API_KEY) {
-            console.log('🔑 Loading API keys from Vite environment variables');
-            return {
-                openai: {
-                    apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
-                    model: 'gpt-3.5-turbo',
-                    maxTokens: 150,
-                    temperature: 0.8
-                },
-                elevenlabs: {
-                    apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY || '',
-                    baseUrl: 'https://api.elevenlabs.io/v1'
-                },
-                twitter: {
-                    apiKey: '',
-                    apiSecret: '',
-                    accessToken: '',
-                    accessTokenSecret: '',
-                    bearerToken: ''
-                },
-                twitch: {
-                    clientId: '',
-                    clientSecret: '',
-                    accessToken: ''
-                }
-            };
-        }
-        return null;
     }
 
     async loadConfig(path) {
