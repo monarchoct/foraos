@@ -63,8 +63,14 @@ jobs:
           echo "Checking API keys content:"
           head -5 config/api-keys.json
         
-      - name: Build
-        run: npm run web-build
+      - name: Build with Environment Variables
+        run: |
+          # Create environment variables file for build
+          cat > .env.production << EOF
+          VITE_OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          VITE_ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
+          EOF
+          npm run web-build
         
       - name: Copy config files to dist
         run: |
