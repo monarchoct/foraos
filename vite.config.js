@@ -17,17 +17,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  publicDir: 'public',
-  build: {
-    rollupOptions: {
-      external: [],
-      output: {
-        assetFileNames: 'assets/[name]-[hash][extname]',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js'
-      }
-    }
-  },
-  assetsInclude: ['**/*.json']
+  }
 })
