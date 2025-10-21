@@ -30,6 +30,44 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      - name: Create API keys config
+        run: |
+          mkdir -p config
+          cat > config/api-keys.json << EOF
+          {
+            "openai": {
+              "apiKey": "${{ secrets.OPENAI_API_KEY || 'your-openai-api-key-here' }}",
+              "model": "gpt-3.5-turbo",
+              "maxTokens": 150,
+              "temperature": 0.8
+            },
+            "venice": {
+              "apiKey": "${{ secrets.VENICE_API_KEY || 'your-venice-token-here' }}",
+              "baseUrl": "https://api.venice.ai/api/v1",
+              "model": "claude-3-5-sonnet",
+              "maxTokens": 150,
+              "temperature": 0.8,
+              "characterSlug": "${{ secrets.VENICE_CHARACTER_SLUG || '' }}"
+            },
+            "elevenlabs": {
+              "apiKey": "${{ secrets.ELEVENLABS_API_KEY || 'your-elevenlabs-api-key-here' }}",
+              "baseUrl": "https://api.elevenlabs.io/v1"
+            },
+            "twitter": {
+              "apiKey": "${{ secrets.TWITTER_API_KEY || 'your-twitter-api-key' }}",
+              "apiSecret": "${{ secrets.TWITTER_API_SECRET || 'your-twitter-api-secret' }}",
+              "accessToken": "${{ secrets.TWITTER_ACCESS_TOKEN || 'your-twitter-access-token' }}",
+              "accessTokenSecret": "${{ secrets.TWITTER_ACCESS_TOKEN_SECRET || 'your-twitter-access-token-secret' }}",
+              "bearerToken": "${{ secrets.TWITTER_BEARER_TOKEN || 'your-twitter-bearer-token' }}"
+            },
+            "twitch": {
+              "clientId": "${{ secrets.TWITCH_CLIENT_ID || 'your-twitch-client-id' }}",
+              "clientSecret": "${{ secrets.TWITCH_CLIENT_SECRET || 'your-twitch-client-secret' }}",
+              "accessToken": "${{ secrets.TWITCH_ACCESS_TOKEN || 'your-twitch-access-token' }}"
+            }
+          }
+          EOF
+        
       - name: Build
         run: npm run web-build
         
