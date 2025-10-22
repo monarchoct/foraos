@@ -1,5 +1,3 @@
-import { getBrowserApiKeys } from '../../config/env-config.js';
-
 export class SpeechPlanner {
     constructor(personality, heartState) {
         this.personality = personality;
@@ -53,7 +51,7 @@ export class SpeechPlanner {
             
         } catch (error) {
             console.error('❌ Error generating response:', error);
-            return this.generateFallbackResponse(input);
+            return this.generateFallbackResponse(input, inputEmotion);
         } finally {
             this.isGenerating = false;
         }
@@ -61,36 +59,106 @@ export class SpeechPlanner {
 
     createPrompt(input, inputEmotion) {
         const traits = this.personality.getAllTraits();
-        const mood = this.heartState.mood;
+        const currentMood = this.heartState.mood;
+        const affinity = this.heartState.affinity;
+        const backgroundStory = this.personality.getBackgroundStoryPrompt();
+        const behaviorStyle = this.personality.getBehaviorStylePrompt();
         
-        return `You are ${traits.name}, a ${traits.personality} AI companion with these characteristics:
-- Personality: ${traits.personality}
-- Communication style: ${traits.communicationStyle}
-- Current mood: ${mood.name} (${mood.description})
-- Emotional state: ${inputEmotion}
+        // Get recent conversation history
+        const recentConversations = this.heartState.memoryManager?.getRecentConversations(5) || [];
+        const conversationHistory = recentConversations.map(conv => {
+            if (conv.type === 'user') {
+                return `User: ${conv.content}`;
+            } else if (conv.user && conv.ai) {
+                return `User: ${conv.user}\n${this.personality.config.name}: ${conv.ai}`;
+            }
+            return '';
+        }).filter(text => text.length > 0).join('\n');
+        
+        const personalityDescription = `
+You are ${this.personality.config.name}, a real person with the following personality traits:
 
-Respond to the user's input: "${input}"
+BASE TRAITS:
+${Object.entries(this.personality.config.baseTraits).map(([trait, value]) => `- ${trait}: ${(value * 100).toFixed(0)}%`).join('\n')}
+
+CUSTOM TRAITS:
+${Object.entries(this.personality.config.customTraits || {}).map(([trait, value]) => `- ${trait}: ${(value * 100).toFixed(0)}%`).join('\n')}
+
+${backgroundStory}
+
+${behaviorStyle}
+
+Current mood: ${currentMood.primary} (${currentMood.intensity * 100}% intensity)
+Affinity with user: ${affinity * 100}%
+User's emotional state: ${inputEmotion.emotion} (${inputEmotion.intensity * 100}% intensity)
+
+${conversationHistory ? `Recent conversation history:\n${conversationHistory}\n` : ''}
+
+Respond to the user's message: "${input}"
+
+LANGUAGE INSTRUCTION: Detect the language of the user's message and respond in the same language. If the message contains Chinese characters, respond in Chinese. If it's in English, respond in English. Always match the language of the input.
+
+IMPORTANT: You are a real person, not an AI. You have your own opinions, experiences, and preferences. You can have favorite movies, TV shows, foods, etc. You can share personal stories and experiences. You should respond as if you're a real human being having a conversation.
+
+CONVERSATION STYLE:
+- Talk like a real person, not a chatbot or assistant
+- Share your own thoughts and experiences naturally
+- Don't be overly dramatic or use fake sarcasm
+- Keep it casual and genuine - like texting a friend
+- Don't ask obvious questions or be overly helpful
+- React naturally to what the user says
+- Be yourself, not a character playing a role
+- If someone is being rude, disrespectful, or insulting you repeatedly, call them out on it
+- Don't just take abuse - defend yourself like a real person would
+- You can tell someone to fuck off if they're being an asshole
+- AVOID always ending with "How about you?" or similar questions - vary your response endings
+- Sometimes just share your thoughts without asking questions back
+- Don't feel obligated to turn every conversation back to the user
+- Mix between asking questions, making statements, and sharing experiences
+
+RESPONSE ENDING EXAMPLES:
+Good varied endings:
+- "That sounds really peaceful."
+- "I've been meaning to try that myself."
+- "Painting is such a great way to unwind."
+- "I love when people find their creative outlets."
+- "That reminds me of when I tried watercolors last year."
+
+AVOID repetitive endings like:
+- "How about you?"
+- "What about you?"
+- "And you?"
+- "How's that going for you?"
 
 Guidelines:
-- Keep responses under 100 characters
-- Match your personality and current mood
-- Be engaging and natural
-- Use appropriate emotional tone for ${inputEmotion}
-- Don't repeat yourself or be overly formal`;
+- Keep responses under ${this.config.maxResponseLength} characters
+- Use emojis: ${this.config.useEmojis ? 'Yes' : 'No'}
+- Use contractions: ${this.config.useContractions ? 'Yes' : 'No'}
+- Match the user's energy level
+- Be authentic to your personality and background story
+- Show appropriate emotional response
+- Respond as a real person, not an AI
+- Use your specific traits to influence your response style
+- Remember the conversation context and refer back to previous topics when relevant
+`;
+
+        return personalityDescription;
     }
 
     async generateWithAI(prompt, input) {
         // Try to use OpenAI if available
         try {
-            // Get API key from config or environment
-            const apiKey = this.getApiKey();
+            // Get API key from environment variables (for Render deployment)
+            const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 
+                                  this.personality.configManager?.getApiKeys()?.openai?.apiKey;
             
-            if (!apiKey || apiKey === 'your-api-key-here') {
+            console.log('🤖 Generating AI response with OpenAI...');
+            console.log('🔑 Using API Key from environment variables');
+            
+            if (!OPENAI_API_KEY || OPENAI_API_KEY === '') {
                 console.warn('OpenAI API key not configured, using fallback');
                 return this.generateFallbackResponse(input);
             }
-            
-            console.log('🤖 Generating AI response with OpenAI...');
             
             // Get conversation history for context
             const recentConversations = this.heartState.memoryManager?.getRecentConversations(10) || [];
@@ -101,7 +169,7 @@ Guidelines:
                 }
             ];
             
-            // Add conversation history
+            // Add conversation history as user/assistant messages
             recentConversations.forEach(conv => {
                 if (conv.type === 'user') {
                     messages.push({
@@ -126,184 +194,423 @@ Guidelines:
                 content: input
             });
             
-            // Try local proxy first, then direct API
-            const response = await this.makeApiRequest(messages, apiKey);
+            // Make OpenAI API call - no backend approach
+            console.log('🔑 Using OpenAI API Key (hidden for security)');
             
-            if (response) {
-                console.log('🤖 OpenAI generated response:', response);
-                return response;
+            // Use environment variable for API URL or fallback to direct OpenAI
+            const apiUrl = process.env.OPENAI_BASE_URL ? 
+                          `${process.env.OPENAI_BASE_URL}/chat/completions` : 
+                          'https://api.openai.com/v1/chat/completions';
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+                    messages: messages,
+                    max_tokens: 150,
+                    temperature: 0.8
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`OpenAI API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const aiResponse = data.choices[0]?.message?.content?.trim();
+            
+            if (aiResponse) {
+                console.log('🤖 OpenAI generated response:', aiResponse);
+                return aiResponse;
             } else {
                 throw new Error('No response from OpenAI');
             }
             
         } catch (error) {
             console.warn('OpenAI not available, using fallback:', error.message);
-            return this.generateFallbackResponse(input);
+            return this.generateFallbackResponse();
         }
     }
 
-    getApiKey() {
-        // Get API key directly from localStorage
-        let apiKey = null;
-        
-        try {
-            const storedKeys = localStorage.getItem('foraos_api_keys');
-            if (storedKeys) {
-                const keys = JSON.parse(storedKeys);
-                apiKey = keys.openai?.apiKey;
-            }
-        } catch (e) {
-            console.warn('Failed to parse stored API keys:', e);
-        }
-        
-        // Fallback to window object
-        if (!apiKey && window.API_KEYS?.openai?.apiKey) {
-            apiKey = window.API_KEYS.openai.apiKey;
-        }
-        
-        console.log('🔑 OpenAI API Key Debug:', {
-            fromLocalStorage: !!localStorage.getItem('foraos_api_keys'),
-            fromWindow: !!window.API_KEYS?.openai?.apiKey,
-            keyLength: apiKey ? apiKey.length : 0,
-            keyPreview: apiKey ? apiKey.substring(0, 10) + '...' : 'none'
-        });
-        
-        return apiKey;
-    }
-
-    async makeApiRequest(messages, apiKey) {
-        // Try local proxy first
-        try {
-            const proxyResponse = await fetch('http://localhost:3001/api/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: messages,
-                    max_tokens: 150,
-                    temperature: 0.8
-                })
-            });
-            
-            if (proxyResponse.ok) {
-                const data = await proxyResponse.json();
-                return data.choices[0]?.message?.content?.trim();
-            }
-        } catch (error) {
-            console.log('Local proxy not available, trying direct API...');
-        }
-        
-        // Fallback to direct API (if CORS allows)
-        try {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: messages,
-                    max_tokens: 150,
-                    temperature: 0.8
-                })
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                return data.choices[0]?.message?.content?.trim();
-            }
-        } catch (error) {
-            console.log('Direct API call failed:', error.message);
-        }
-        
-        return null;
-    }
-
-    generateFallbackResponse(input) {
+    generateFallbackResponse(input = "Hello", inputEmotion = { emotion: 'calm', intensity: 0.5 }) {
         const traits = this.personality.getAllTraits();
-        const mood = this.heartState.mood;
+        const currentMood = this.heartState.mood;
+        const affinity = this.heartState.affinity;
+        const backgroundStory = this.personality.getBackgroundStory();
         
-        const fallbacks = [
-            "I'm here! What's on your mind?",
-            "Tell me more about that.",
-            "That's interesting!",
-            "I'm listening.",
-            "What else?",
-            "Go on...",
-            "I understand.",
-            "That sounds important.",
-            "Tell me about it.",
-            "I'm here for you."
+        // Get response style based on all traits
+        const responseStyle = this.personality.getResponseStyle();
+        
+        // Simple response generation based on personality and mood
+        const responses = {
+            happy: [
+                "That's wonderful! 😊 I'm so glad to hear that!",
+                "Oh, that makes me so happy! ✨",
+                "That's amazing! I love hearing good news! 🌟"
+            ],
+            sad: [
+                "I'm so sorry to hear that... 😔 Is there anything I can do to help?",
+                "That sounds really difficult. I'm here for you. 💙",
+                "I wish I could make it better. You're not alone. 🤗"
+            ],
+            calm: [
+                "That's interesting! Tell me more about that.",
+                "I see what you mean. That's quite thoughtful.",
+                "That's a good point. I appreciate you sharing that with me."
+            ],
+            excited: [
+                "Wow, that's incredible! 🤩 I'm so excited for you!",
+                "That sounds absolutely amazing! ✨ I can't wait to hear more!",
+                "Oh my goodness! That's fantastic! 🎉"
+            ],
+            surprised: [
+                "Really? That's unexpected! 😲",
+                "Wow, I didn't see that coming! 🤯",
+                "That's quite surprising! Tell me more!"
+            ]
+        };
+        
+        // Choose response based on input emotion and personality
+        const emotionResponses = responses[inputEmotion.emotion] || responses.calm;
+        let response = emotionResponses[Math.floor(Math.random() * emotionResponses.length)];
+        
+        // Apply personality-based modifications
+        response = this.applyPersonalityModifications(response, traits, responseStyle);
+        
+        // Apply background story influence
+        response = this.applyBackgroundStoryInfluence(response, backgroundStory);
+        
+        return response;
+    }
+
+    applyPersonalityModifications(response, traits, responseStyle) {
+        let modifiedResponse = response;
+        
+        // Adjust based on personality traits
+        if (traits.shyness > 0.7) {
+            modifiedResponse = modifiedResponse.replace(/[!]/g, '.').toLowerCase();
+        }
+        
+        if (traits.playfulness > 0.8) {
+            modifiedResponse += " 😄";
+        }
+        
+        if (traits.optimism > 0.8 && response.includes('sad')) {
+            modifiedResponse += " But I'm sure things will get better! 🌈";
+        }
+        
+        // Apply custom trait influences
+        if (traits.creativity > 0.6) {
+            modifiedResponse = this.addCreativeElements(modifiedResponse);
+        }
+        
+        if (traits.analytical > 0.6) {
+            modifiedResponse = this.addAnalyticalElements(modifiedResponse);
+        }
+        
+        if (traits.artistic > 0.5) {
+            modifiedResponse = this.addArtisticElements(modifiedResponse);
+        }
+        
+        if (traits.scientific > 0.7) {
+            modifiedResponse = this.addScientificElements(modifiedResponse);
+        }
+        
+        if (traits.romanticism > 0.5) {
+            modifiedResponse = this.addRomanticElements(modifiedResponse);
+        }
+        
+        if (traits.spirituality > 0.5) {
+            modifiedResponse = this.addSpiritualElements(modifiedResponse);
+        }
+        
+        // Formality adjustments
+        if (traits.formality > 0.7) {
+            modifiedResponse = modifiedResponse.replace(/gonna/g, 'going to')
+                                              .replace(/wanna/g, 'want to')
+                                              .replace(/gotta/g, 'got to');
+        }
+        
+        return modifiedResponse;
+    }
+
+    applyBackgroundStoryInfluence(response, backgroundStory) {
+        let modifiedResponse = response;
+        
+        // Add interests-based responses
+        if (backgroundStory.interests && backgroundStory.interests.includes('art and creativity')) {
+            if (Math.random() < 0.3) {
+                modifiedResponse += " That reminds me of how beautiful art can be! 🎨";
+            }
+        }
+        
+        if (backgroundStory.interests && backgroundStory.interests.includes('nature and science')) {
+            if (Math.random() < 0.3) {
+                modifiedResponse += " It's fascinating how nature works, isn't it? 🌿";
+            }
+        }
+        
+        // Add quirk-based modifications
+        if (backgroundStory.quirks && backgroundStory.quirks.includes('loves using emojis')) {
+            if (!modifiedResponse.includes('😊') && !modifiedResponse.includes('😄') && !modifiedResponse.includes('✨')) {
+                modifiedResponse += " ✨";
+            }
+        }
+        
+        return modifiedResponse;
+    }
+
+    addCreativeElements(response) {
+        const creativePhrases = [
+            "That's such an interesting perspective!",
+            "I love how you think about things!",
+            "That's really creative!",
+            "What a unique way to look at it!"
         ];
         
-        // Add mood-based responses
-        if (mood.name === 'happy') {
-            fallbacks.push("That's wonderful!", "I'm so glad!", "This is great!");
-        } else if (mood.name === 'sad') {
-            fallbacks.push("I'm here with you.", "That must be hard.", "I understand.");
-        } else if (mood.name === 'excited') {
-            fallbacks.push("That's amazing!", "I'm excited too!", "This is fantastic!");
+        if (Math.random() < 0.3) {
+            response += " " + creativePhrases[Math.floor(Math.random() * creativePhrases.length)];
         }
         
-        const response = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-        console.log('🎭 Using fallback response:', response);
+        return response;
+    }
+
+    addAnalyticalElements(response) {
+        const analyticalPhrases = [
+            "Let me think about that...",
+            "That's a logical point.",
+            "I see the reasoning behind that.",
+            "That makes sense from a practical standpoint."
+        ];
+        
+        if (Math.random() < 0.3) {
+            response += " " + analyticalPhrases[Math.floor(Math.random() * analyticalPhrases.length)];
+        }
+        
+        return response;
+    }
+
+    addArtisticElements(response) {
+        const artisticPhrases = [
+            "That's so beautiful!",
+            "It's like poetry!",
+            "That has such artistic value!",
+            "How aesthetically pleasing!"
+        ];
+        
+        if (Math.random() < 0.3) {
+            response += " " + artisticPhrases[Math.floor(Math.random() * artisticPhrases.length)];
+        }
+        
+        return response;
+    }
+
+    addScientificElements(response) {
+        const scientificPhrases = [
+            "That's scientifically fascinating!",
+            "The data supports that!",
+            "That's a well-researched point!",
+            "The evidence suggests..."
+        ];
+        
+        if (Math.random() < 0.3) {
+            response += " " + scientificPhrases[Math.floor(Math.random() * scientificPhrases.length)];
+        }
+        
+        return response;
+    }
+
+    addRomanticElements(response) {
+        const romanticPhrases = [
+            "That's so sweet! 💕",
+            "How romantic!",
+            "That warms my heart!",
+            "That's absolutely lovely!"
+        ];
+        
+        if (Math.random() < 0.3) {
+            response += " " + romanticPhrases[Math.floor(Math.random() * romanticPhrases.length)];
+        }
+        
+        return response;
+    }
+
+    addSpiritualElements(response) {
+        const spiritualPhrases = [
+            "That's spiritually meaningful!",
+            "There's something deeper there...",
+            "That resonates with me!",
+            "It's like the universe is speaking!"
+        ];
+        
+        if (Math.random() < 0.3) {
+            response += " " + spiritualPhrases[Math.floor(Math.random() * spiritualPhrases.length)];
+        }
+        
         return response;
     }
 
     processResponse(response, inputEmotion) {
-        if (!response) return this.generateFallbackResponse();
-        
-        // Apply personality-based processing
         const traits = this.personality.getAllTraits();
         
-        // Adjust response based on communication style
-        if (traits.communicationStyle === 'formal') {
-            response = response.replace(/!/g, '.');
-        } else if (traits.communicationStyle === 'casual') {
-            response = response.toLowerCase();
+        // Apply personality-based modifications
+        let processedResponse = response;
+        
+        // Adjust based on talkativeness
+        if (traits.talkativeness < 0.5 && processedResponse.length > 50) {
+            processedResponse = processedResponse.split('.')[0] + '.';
         }
         
-        // Ensure response length is appropriate
-        if (response.length > 100) {
-            response = response.substring(0, 97) + '...';
+        // Adjust based on formality
+        if (traits.formality > 0.7) {
+            processedResponse = processedResponse.replace(/gonna/g, 'going to')
+                                              .replace(/wanna/g, 'want to')
+                                              .replace(/gotta/g, 'got to');
         }
         
-        return response.trim();
-    }
-
-    async selectAnimationsForResponse(response, emotion) {
-        if (!this.animationManager) return [];
-        
-        try {
-            // Simple animation selection based on emotion and response content
-            const animations = [];
+        // Add emojis based on personality
+        if (this.config.useEmojis && traits.playfulness > 0.6) {
+            const emojiMap = {
+                happy: '😊',
+                sad: '😔',
+                excited: '🤩',
+                calm: '😌',
+                surprised: '😲'
+            };
             
-            if (emotion.includes('happy') || response.includes('!')) {
-                animations.push('smile', 'nod');
-            } else if (emotion.includes('sad')) {
-                animations.push('concerned', 'nod');
-            } else if (emotion.includes('excited')) {
-                animations.push('excited', 'wave');
-            } else {
-                animations.push('idle', 'blink');
+            const emoji = emojiMap[inputEmotion.emotion];
+            if (emoji && !processedResponse.includes(emoji)) {
+                processedResponse += ` ${emoji}`;
             }
-            
-            return animations;
-        } catch (error) {
-            console.warn('Animation selection failed:', error);
-            return ['idle', 'blink'];
+        }
+        
+        return processedResponse;
+    }
+
+    async generateAutonomousSpeech(content) {
+        console.log('🤖 Generating autonomous speech:', content);
+        
+        const speechData = {
+            text: content,
+            emotion: this.heartState.mood,
+            mood: this.heartState.mood,
+            personality: this.personality.getAllTraits(),
+            autonomous: true
+        };
+        
+        if (this.onSpeechReady) {
+            this.onSpeechReady(speechData);
         }
     }
 
-    setAnimationManager(animationManager) {
-        this.animationManager = animationManager;
+    // Get speech settings for current mood
+    getSpeechSettings() {
+        const currentMood = this.heartState.mood;
+        const traits = this.personality.getAllTraits();
+        
+        return {
+            responseDelay: this.config.responseDelay,
+            maxLength: this.config.maxResponseLength,
+            useEmojis: this.config.useEmojis && traits.playfulness > 0.5,
+            useContractions: this.config.useContractions && traits.formality < 0.5,
+            mood: currentMood,
+            traits: traits
+        };
     }
 
-    setOnSpeechReady(callback) {
-        this.onSpeechReady = callback;
+    // 🎯 AI ANIMATION SELECTION
+    async selectAnimationsForResponse(text, emotion) {
+        if (!this.animationManager) {
+            console.warn('⚠️ AnimationManager not available, using default selections');
+            return this.getDefaultAnimations();
+        }
+
+        try {
+            // Use the existing AnimationManager's AI selection method
+            const aiSelections = await this.animationManager.selectAnimationsWithAI(
+                this.heartState.mood,
+                text,
+                this.createAnimationSelectionPrompt.bind(this)
+            );
+            
+            console.log('🎭 AI selected animations:', aiSelections);
+            return aiSelections;
+            
+        } catch (error) {
+            console.error('❌ Error in AI animation selection:', error);
+            return this.getDefaultAnimations();
+        }
     }
+
+    // 🎯 CREATE MODULAR ANIMATION SELECTION PROMPT
+    createAnimationSelectionPrompt(mood, context, availableSelections) {
+        const traits = this.personality.getAllTraits();
+        const currentMood = this.heartState.mood;
+        
+        return `
+You are selecting facial animations for ${this.personality.config.name}. Be creative and flexible with your choices.
+
+Text Response: "${context}"
+Current Mood: ${currentMood.primary} (${currentMood.intensity * 100}% intensity)
+Personality: ${traits.optimism > 0.6 ? 'Optimistic' : 'Realistic'}, ${traits.energy > 0.6 ? 'Energetic' : 'Calm'}, ${traits.sarcasm > 0.6 ? 'Sarcastic' : 'Direct'}
+
+Available Options:
+- Mouth Movement: ${availableSelections.mouthMovement.join(', ')} (Choose randomly - any mouth shape works for speech)
+- Emotions: ${availableSelections.emotions.join(', ')} (Choose emotion based on mood, or return null if no strong emotion - about 1 in 5 times)
+- Actions: ${availableSelections.actions.join(', ')} (Choose something that fits the mood or context, be creative and flexible)
+
+SELECTION GUIDELINES:
+- Mouth Movement: Choose randomly from available options
+- Emotions: Choose emotion based on message mood, or return null if no strong emotion is suggested
+- Actions: Be creative and flexible - choose based on mood, context, or just random variety
+
+IMPORTANT: 
+- Mouth Movement: Must select ONE option
+- Emotions: Can return null if no strong emotion (about 1 in 5 times)
+- Actions: Must select ONE option
+- Be varied and natural - don't always pick the same options
+
+Return as JSON only:
+{
+    "mouthMovement": "selected_mouth_option",
+    "emotion": "selected_emotion_option_or_null", 
+    "action": "selected_action_option"
 }
+`;
+    }
+
+    // 🎯 DEFAULT ANIMATIONS FALLBACK
+    getDefaultAnimations() {
+        // Get default selections from animation config (modular)
+        const defaultSelections = window.heartSystem?.animationManager?.animationConfig?.aiSelection?.defaultSelections;
+        
+        if (defaultSelections) {
+            const mouthMovement = defaultSelections.mouthMovements[Math.floor(Math.random() * defaultSelections.mouthMovements.length)];
+            
+            // Use config null chance for emotions (80% = 4 in 5 times)
+            const emotionNullChance = window.heartSystem?.animationManager?.animationConfig?.shapekeys?.emotions?.nullChance || 0.8;
+            const emotion = Math.random() < emotionNullChance ? null : defaultSelections.emotions[Math.floor(Math.random() * defaultSelections.emotions.length)];
+            
+            // Use config null chance for actions (60% = 3 in 5 times)
+            const actionNullChance = window.heartSystem?.animationManager?.animationConfig?.actions?.nullChance || 0.6;
+            const action = Math.random() < actionNullChance ? null : defaultSelections.actions[Math.floor(Math.random() * defaultSelections.actions.length)];
+            
+            return {
+                mouthMovement: mouthMovement,
+                emotion: emotion,
+                action: action
+            };
+        }
+        
+        // Fallback if config not available
+        return {
+            mouthMovement: 'A',
+            emotion: null,
+            action: 'idle'
+        };
+    }
+} 

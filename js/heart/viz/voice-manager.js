@@ -1,5 +1,3 @@
-import { getBrowserApiKeys } from '../../config/env-config.js';
-
 export class VoiceManager {
     constructor(configManager) {
         this.configManager = configManager;
@@ -70,34 +68,10 @@ export class VoiceManager {
     }
 
     async generateSpeech(text, modifiers) {
-        // Get API key directly from localStorage
-        let ELEVENLABS_API_KEY = null;
+        const apiKeys = this.configManager.getApiKeys();
         
-        try {
-            const storedKeys = localStorage.getItem('foraos_api_keys');
-            if (storedKeys) {
-                const keys = JSON.parse(storedKeys);
-                ELEVENLABS_API_KEY = keys.elevenlabs?.apiKey;
-            }
-        } catch (e) {
-            console.warn('Failed to parse stored API keys:', e);
-        }
-        
-        // Fallback to window object
-        if (!ELEVENLABS_API_KEY && window.API_KEYS?.elevenlabs?.apiKey) {
-            ELEVENLABS_API_KEY = window.API_KEYS.elevenlabs.apiKey;
-        }
-        
-        console.log('🔑 ElevenLabs API Key Debug:', {
-            fromLocalStorage: !!localStorage.getItem('foraos_api_keys'),
-            fromWindow: !!window.API_KEYS?.elevenlabs?.apiKey,
-            keyLength: ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.length : 0,
-            keyPreview: ELEVENLABS_API_KEY ? ELEVENLABS_API_KEY.substring(0, 10) + '...' : 'none'
-        });
-        
-        if (!ELEVENLABS_API_KEY) {
-            console.error('❌ ElevenLabs API key not found! Please configure it via api-config.html');
-            throw new Error('ElevenLabs API key not configured. Please open api-config.html to set your API key.');
+        if (!apiKeys.elevenlabs || apiKeys.elevenlabs.apiKey === 'your-elevenlabs-api-key-here') {
+            throw new Error('ElevenLabs API key not configured');
         }
         
         // Detect if text contains Chinese characters
@@ -131,12 +105,12 @@ export class VoiceManager {
             voiceSettings: requestBody.voice_settings
         });
         
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        const response = await fetch(`${apiKeys.elevenlabs.baseUrl}/text-to-speech/${voiceId}`, {
             method: 'POST',
             headers: {
                 'Accept': 'audio/mpeg',
                 'Content-Type': 'application/json',
-                'xi-api-key': ELEVENLABS_API_KEY
+                'xi-api-key': apiKeys.elevenlabs.apiKey
             },
             body: JSON.stringify(requestBody)
         });
