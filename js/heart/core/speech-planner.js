@@ -151,8 +151,8 @@ Guidelines:
             const apiKeys = this.personality.configManager?.getApiKeys();
             console.log('🔑 API Keys loaded successfully');
             
-            if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '') {
-                console.warn('OpenAI API key not configured, using fallback');
+            if (!apiKeys?.openai?.apiKey || apiKeys.openai.apiKey === '' || apiKeys.openai.apiKey.includes('your-') || apiKeys.openai.apiKey.includes('_here')) {
+                console.warn('⚠️ OpenAI API key not configured in .env file, using fallback');
                 return this.generateFallbackResponse(input);
             }
             

@@ -70,8 +70,12 @@ export class VoiceManager {
     async generateSpeech(text, modifiers) {
         const apiKeys = this.configManager.getApiKeys();
         
-        if (!apiKeys.elevenlabs || apiKeys.elevenlabs.apiKey === 'your-elevenlabs-api-key-here') {
-            throw new Error('ElevenLabs API key not configured');
+        if (!apiKeys.elevenlabs || 
+            !apiKeys.elevenlabs.apiKey || 
+            apiKeys.elevenlabs.apiKey.trim() === '' ||
+            apiKeys.elevenlabs.apiKey.includes('your-') ||
+            apiKeys.elevenlabs.apiKey.includes('_here')) {
+            throw new Error('⚠️ ElevenLabs API key not configured in .env file');
         }
         
         // Detect if text contains Chinese characters

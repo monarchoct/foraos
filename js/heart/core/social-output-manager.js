@@ -11,11 +11,15 @@ export class SocialOutputManager {
         this.apiKeys = this.configManager.getApiKeys();
         
         // Check if social APIs are configured
-        if (this.apiKeys.twitter && this.apiKeys.twitter.apiKey !== 'your-twitter-api-key-here') {
+        if (this.apiKeys.twitter && 
+            this.apiKeys.twitter.apiKey && 
+            this.apiKeys.twitter.apiKey.trim() !== '' &&
+            !this.apiKeys.twitter.apiKey.includes('your-') &&
+            !this.apiKeys.twitter.apiKey.includes('_here')) {
             this.isEnabled = true;
             console.log('✅ Social output enabled');
         } else {
-            console.log('⚠️ Social output disabled - no API keys configured');
+            console.log('⚠️ Social output disabled - no Twitter API key configured in .env file');
         }
     }
 

@@ -3,7 +3,6 @@ export class ConfigManager {
         this.configs = {};
         this.configPaths = {
             'personality': 'config/personality.json',
-            'api-keys': 'config/api-keys.json', // Back to regular file
             'heart-state': 'config/heart-state.json',
             'memory': 'config/memory.json'
         };
@@ -15,7 +14,40 @@ export class ConfigManager {
         // Check if we're in a browser environment
         if (typeof window !== 'undefined') {
             // In browser, we can't access process.env directly
-            // We'll rely on the server to provide env vars or use config files
+            // We'll rely on Vite to inject environment variables
+            this.envApiKeys = {
+                openai: {
+                    apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
+                    model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo',
+                    maxTokens: parseInt(import.meta.env.VITE_OPENAI_MAX_TOKENS) || 150,
+                    temperature: parseFloat(import.meta.env.VITE_OPENAI_TEMPERATURE) || 0.8
+                },
+                venice: {
+                    apiKey: import.meta.env.VITE_VENICE_API_KEY || '',
+                    baseUrl: import.meta.env.VITE_VENICE_BASE_URL || 'https://api.venice.ai/api/v1',
+                    model: import.meta.env.VITE_VENICE_MODEL || 'claude-3-5-sonnet',
+                    maxTokens: parseInt(import.meta.env.VITE_OPENAI_MAX_TOKENS) || 150,
+                    temperature: parseFloat(import.meta.env.VITE_OPENAI_TEMPERATURE) || 0.8,
+                    characterSlug: import.meta.env.VITE_VENICE_CHARACTER_SLUG || ''
+                },
+                elevenlabs: {
+                    apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY || '',
+                    baseUrl: import.meta.env.VITE_ELEVENLABS_BASE_URL || 'https://api.elevenlabs.io/v1'
+                },
+                twitter: {
+                    apiKey: import.meta.env.VITE_TWITTER_API_KEY || '',
+                    apiSecret: import.meta.env.VITE_TWITTER_API_SECRET || '',
+                    accessToken: import.meta.env.VITE_TWITTER_ACCESS_TOKEN || '',
+                    accessTokenSecret: import.meta.env.VITE_TWITTER_ACCESS_TOKEN_SECRET || '',
+                    bearerToken: import.meta.env.VITE_TWITTER_BEARER_TOKEN || ''
+                },
+                twitch: {
+                    clientId: import.meta.env.VITE_TWITCH_CLIENT_ID || '',
+                    clientSecret: import.meta.env.VITE_TWITCH_CLIENT_SECRET || '',
+                    accessToken: import.meta.env.VITE_TWITCH_ACCESS_TOKEN || ''
+                }
+            };
+            console.log('🔑 Environment API keys loaded from Vite');
             return;
         }
         
@@ -53,22 +85,15 @@ export class ConfigManager {
                     accessToken: process.env.TWITCH_ACCESS_TOKEN || ''
                 }
             };
-            console.log('Environment API keys loaded');
+            console.log('🔑 Environment API keys loaded from process.env');
         } catch (error) {
-            console.error('Failed to load environment API keys:', error);
+            console.error('❌ Failed to load environment API keys:', error);
         }
     }
 
     async loadConfigs() {
-        
         try {
             const promises = Object.entries(this.configPaths).map(async ([key, path]) => {
-                // Skip api-keys file loading to avoid JSON errors
-                if (key === 'api-keys') {
-                    this.configs[key] = this.getDefaultConfig(path);
-                    return;
-                }
-                
                 const config = await this.loadConfig(path);
                 this.configs[key] = config;
             });
@@ -92,19 +117,6 @@ export class ConfigManager {
                 throw new Error(`Failed to load config: ${response.statusText}`);
             }
             const config = await response.json();
-            
-            // If API keys file exists but has empty keys, log a warning
-            if (path.includes('api-keys')) {
-                const hasKeys = Object.values(config).some(service => 
-                    service.apiKey && service.apiKey.trim() !== ''
-                );
-                if (!hasKeys) {
-                    console.warn('API keys file found but all keys are empty');
-                } else {
-                    console.log('API keys loaded successfully');
-                }
-            }
-            
             return config;
         } catch (error) {
             console.error(`Error loading config from ${path}:`, error);
@@ -114,15 +126,7 @@ export class ConfigManager {
     }
 
     getDefaultConfig(path) {
-        if (path.includes('api-keys')) {
-            return {
-                openai: { apiKey: '', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8 },
-                venice: { apiKey: '', baseUrl: 'https://api.openai.com/v1', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8, characterSlug: '' },
-                elevenlabs: { apiKey: '', baseUrl: 'https://api.elevenlabs.io/v1' },
-                twitter: { apiKey: '', apiSecret: '', accessToken: '', accessTokenSecret: '', bearerToken: '' },
-                twitch: { clientId: '', clientSecret: '', accessToken: '' }
-            };
-        } else if (path.includes('heart-state')) {
+        if (path.includes('heart-state')) {
             return { emotions: {}, thoughts: [], memories: [] };
         } else if (path.includes('memory')) {
             return { conversations: [], emotionalStates: [] };
@@ -139,21 +143,31 @@ export class ConfigManager {
     }
 
     getApiKeys() {
-        // Prioritize environment variables over config file
+        // Only return environment API keys - no config file fallback
         if (this.envApiKeys && this.hasEnvApiKeys()) {
             return this.envApiKeys;
         }
-        return this.configs['api-keys'];
+        
+        // Return empty structure if no env keys are available
+        console.warn('⚠️ No environment API keys found. Please configure your .env file.');
+        return {
+            openai: { apiKey: '', model: 'gpt-3.5-turbo', maxTokens: 150, temperature: 0.8 },
+            venice: { apiKey: '', baseUrl: 'https://api.venice.ai/api/v1', model: 'claude-3-5-sonnet', maxTokens: 150, temperature: 0.8, characterSlug: '' },
+            elevenlabs: { apiKey: '', baseUrl: 'https://api.elevenlabs.io/v1' },
+            twitter: { apiKey: '', apiSecret: '', accessToken: '', accessTokenSecret: '', bearerToken: '' },
+            twitch: { clientId: '', clientSecret: '', accessToken: '' }
+        };
     }
 
     hasEnvApiKeys() {
         if (!this.envApiKeys) return false;
         
-        // Check if any environment API keys are set
+        // Check if any environment API keys are set and not empty
         return Object.values(this.envApiKeys).some(service => 
             service.apiKey && service.apiKey.trim() !== '' && 
             !service.apiKey.includes('your-') && 
-            !service.apiKey.includes('here')
+            !service.apiKey.includes('here') &&
+            !service.apiKey.includes('_here')
         );
     }
 
@@ -215,9 +229,18 @@ export class ConfigManager {
         const apiKeys = this.getApiKeys();
         if (!apiKeys) return false;
         
-        // Check if essential API keys are present
-        const hasOpenAI = apiKeys.openai && apiKeys.openai.apiKey !== 'your-openai-api-key-here';
-        const hasElevenLabs = apiKeys.elevenlabs && apiKeys.elevenlabs.apiKey !== 'your-elevenlabs-api-key-here';
+        // Check if essential API keys are present and not empty
+        const hasOpenAI = apiKeys.openai && 
+            apiKeys.openai.apiKey && 
+            apiKeys.openai.apiKey.trim() !== '' && 
+            !apiKeys.openai.apiKey.includes('your-') &&
+            !apiKeys.openai.apiKey.includes('_here');
+            
+        const hasElevenLabs = apiKeys.elevenlabs && 
+            apiKeys.elevenlabs.apiKey && 
+            apiKeys.elevenlabs.apiKey.trim() !== '' && 
+            !apiKeys.elevenlabs.apiKey.includes('your-') &&
+            !apiKeys.elevenlabs.apiKey.includes('_here');
         
         return hasOpenAI || hasElevenLabs;
     }
@@ -239,8 +262,6 @@ export class ConfigManager {
         switch (configName) {
             case 'personality':
                 return this.validatePersonalityConfig(config);
-            case 'api-keys':
-                return this.validateApiKeysConfig(config);
             case 'heart-state':
                 return this.validateHeartStateConfig(config);
             default:
@@ -259,10 +280,6 @@ export class ConfigManager {
         return true;
     }
 
-    validateApiKeysConfig(config) {
-        // API keys are optional for basic functionality
-        return true;
-    }
 
     validateHeartStateConfig(config) {
         const required = ['mood', 'affinity', 'attention'];
