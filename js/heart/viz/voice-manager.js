@@ -68,15 +68,18 @@ export class VoiceManager {
     }
 
     async generateSpeech(text, modifiers) {
-        const apiKeys = this.configManager.getApiKeys();
+        // Get API key from environment variables (for Render deployment)
+        const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || 
+                                  this.configManager?.getApiKeys()?.elevenlabs?.apiKey;
         
-        if (!apiKeys.elevenlabs || apiKeys.elevenlabs.apiKey === 'your-elevenlabs-api-key-here') {
+        if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'your-elevenlabs-api-key-here') {
             throw new Error('ElevenLabs API key not configured');
         }
         
         // Detect if text contains Chinese characters
         const hasChinese = /[\u4e00-\u9fff]/.test(text);
-        const voiceId = hasChinese ? this.voiceSettings.chineseVoiceId : this.voiceSettings.voiceId;
+        const voiceId = process.env.ELEVENLABS_VOICE_ID || 
+                       (hasChinese ? this.voiceSettings.chineseVoiceId : this.voiceSettings.voiceId);
         
         console.log(`🎤 Text: "${text}"`);
         console.log(`🎤 Contains Chinese: ${hasChinese}`);
@@ -105,12 +108,17 @@ export class VoiceManager {
             voiceSettings: requestBody.voice_settings
         });
         
-        const response = await fetch(`${apiKeys.elevenlabs.baseUrl}/text-to-speech/${voiceId}`, {
+        // Use environment variable for API URL or fallback to config
+        const apiUrl = process.env.ELEVENLABS_BASE_URL ? 
+                      `${process.env.ELEVENLABS_BASE_URL}/text-to-speech/${voiceId}` :
+                      `${this.configManager?.getApiKeys()?.elevenlabs?.baseUrl || 'https://api.elevenlabs.io/v1'}/text-to-speech/${voiceId}`;
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'audio/mpeg',
                 'Content-Type': 'application/json',
-                'xi-api-key': apiKeys.elevenlabs.apiKey
+                'xi-api-key': ELEVENLABS_API_KEY
             },
             body: JSON.stringify(requestBody)
         });
