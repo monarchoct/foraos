@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 export default defineConfig({
   define: {
@@ -10,6 +11,44 @@ export default defineConfig({
     'process.env.ELEVENLABS_BASE_URL': JSON.stringify(process.env.ELEVENLABS_BASE_URL),
     'process.env.ELEVENLABS_VOICE_ID': JSON.stringify(process.env.ELEVENLABS_VOICE_ID),
   },
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'config/**/*',
+          dest: 'config'
+        },
+        {
+          src: 'models/**/*',
+          dest: 'models'
+        },
+        {
+          src: 'backgrounds/**/*',
+          dest: 'backgrounds'
+        },
+        {
+          src: 'icons/**/*',
+          dest: 'icons'
+        },
+        {
+          src: 'js/**/*',
+          dest: 'js'
+        },
+        {
+          src: 'styles.css',
+          dest: '.'
+        },
+        {
+          src: 'CNAME',
+          dest: '.'
+        },
+        {
+          src: 'public/**/*',
+          dest: '.'
+        }
+      ]
+    })
+  ],
   server: {
     proxy: {
       '/api/chat': {
