@@ -252,7 +252,7 @@ export class TwitterApiClient {
 
     async handleMentionWithAI(mention) {
         try {
-            // Clean the mention text (remove @mimicosx mentions)
+            // Clean the mention text (remove @your_username mentions)
             const cleanText = mention.text.replace(/@\w+/g, '').trim();
             
             console.log(`🤖 Generating AI response to: "${cleanText}"`);

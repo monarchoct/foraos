@@ -1,8 +1,8 @@
 <div align="center">
 
-![mimicOS Banner](./banner1.png)
+![ForaOS Banner](./banner1.png)
 
-# 🤖✨ mimicOS ✨🤖
+# 🤖✨ ForaOS ✨🤖
 
 ### *Create Your Perfect AI Companion*
 

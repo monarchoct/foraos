@@ -24,9 +24,9 @@ process.env.REQUIRED_TOKEN_MINT = process.env.REQUIRED_TOKEN_MINT || 'your-token
 process.env.MIN_TOKEN_BALANCE = process.env.MIN_TOKEN_BALANCE || '1';
 
 // Twitter credentials
-process.env.TWITTER_USERNAME = process.env.TWITTER_USERNAME || 'mimicosx';
-process.env.TWITTER_PASSWORD = process.env.TWITTER_PASSWORD || 'mimic123!';
-process.env.TWITTER_EMAIL = process.env.TWITTER_EMAIL || 'mimicos792@gmail.com';
+process.env.TWITTER_USERNAME = process.env.TWITTER_USERNAME || 'your_twitter_username';
+process.env.TWITTER_PASSWORD = process.env.TWITTER_PASSWORD || 'your_twitter_password';
+process.env.TWITTER_EMAIL = process.env.TWITTER_EMAIL || 'your_email@example.com';
 
 console.log('🤖 Starting HEART Backend with Twitter Puppeteer Service...');
 console.log('🐦 Twitter Username:', process.env.TWITTER_USERNAME);

@@ -1,7 +1,7 @@
 {
   "account": {
-    "username": "mimicosx",
-    "displayName": "MimicOS Test",
+    "username": "your_twitter_username",
+    "displayName": "ForaOS Test",
     "bio": "AI Assistant powered by advanced technology"
   },
   "monitoring": {
@@ -10,7 +10,7 @@
     "targets": [
              {
          "type": "search",
-         "query": "@mimicosx OR \"mimicos\" OR \"mimic\" OR \"mimicOS\"",
+         "query": "@your_twitter_username OR \"foraos\" OR \"fora\" OR \"ForaOS\"",
          "description": "Monitor mentions of your AI"
        },
       {

@@ -75,7 +75,7 @@ class AIResponseGenerator {
                         },
                         {
                             role: 'user',
-                            content: `@mimicOSX ${mentionText}`
+                            content: `@YourUsername ${mentionText}`
                         }
                     ],
                     max_tokens: this.apiKeys.openai.maxTokens || 150,
