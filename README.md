@@ -2,7 +2,7 @@
 
 ![ForaOS Banner](./banner1.png)
 
-# 🤖✨ ForaOS ✨🤖
+# ✨ ForaOS ✨
 
 ### *Create Your Perfect AI Companion*
 
